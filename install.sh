@@ -151,6 +151,15 @@ run dot-niri setup
 success "Niri ready"
 
 ########################################################
+# Phase 9: Krew (kubectl plugin manager)
+########################################################
+
+header "Krew (kubectl plugin manager)"
+
+run dot-cloud krew
+success "Krew ready"
+
+########################################################
 # Done — print manual steps
 ########################################################
 

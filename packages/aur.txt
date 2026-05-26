@@ -21,3 +21,6 @@ ttf-nerd-fonts-symbols   # nerd fonts symbols-only (used by neovim + terminal)
 
 # Terminal (if not available in official repos on this CachyOS version)
 # ghostty-bin            # uncomment if ghostty isn't in official/CachyOS repos
+
+# Cloud / Kubernetes
+stern                    # multi-pod log tailing

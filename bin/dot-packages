@@ -93,17 +93,18 @@ cmd_install() {
   all)
     install_pacman "$PACKAGES_DIR/base.txt"
     install_pacman "$PACKAGES_DIR/desktop.txt"
+    install_pacman "$PACKAGES_DIR/cloud.txt"
     install_pacman "$PACKAGES_DIR/dev.txt"
     install_aur    "$PACKAGES_DIR/aur.txt"
     ;;
-  base | desktop | dev)
+  base | desktop | cloud | dev)
     install_pacman "$PACKAGES_DIR/$target.txt"
     ;;
   aur)
     install_aur "$PACKAGES_DIR/aur.txt"
     ;;
   *)
-    log_error "Unknown list: $target (valid: base, desktop, dev, aur, all)"
+    log_error "Unknown list: $target (valid: base, desktop, cloud, dev, aur, all)"
     exit 1
     ;;
   esac
