@@ -1,0 +1,57 @@
+# Ghostty terminal config
+# Reference: ghostty --help-config  or  https://ghostty.org/docs/config
+
+########################################################
+# Font
+########################################################
+
+font-family = Monaspace Argon
+font-size = 14
+# font-style = Regular
+# font-style-bold = Bold
+
+########################################################
+# Theme / appearance
+# Run: ghostty +list-themes
+########################################################
+
+theme = catppuccin-mocha
+
+# Transparent background (requires compositor support)
+background-opacity = 0.95
+
+# Window padding
+window-padding-x = 10
+window-padding-y = 8
+
+# No decorations (niri handles window chrome)
+window-decoration = false
+
+########################################################
+# Shell integration
+########################################################
+
+shell-integration = zsh
+shell-integration-features = cursor,sudo,title
+
+########################################################
+# Cursor
+########################################################
+
+cursor-style = block
+cursor-style-blink = false
+
+########################################################
+# Scrollback
+########################################################
+
+scrollback-limit = 10000
+
+########################################################
+# Keybinds
+# Ghostty uses Super/Ctrl/Alt + key notation.
+# Add custom keybinds below.
+########################################################
+
+# keybind = super+t=new_tab
+# keybind = super+w=close_surface

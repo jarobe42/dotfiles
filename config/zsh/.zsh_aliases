@@ -1,0 +1,62 @@
+#!/usr/bin/env zsh
+
+# Reload zsh config
+alias reload!="RELOAD=1 source $XDG_CONFIG_HOME/zsh/.zshrc"
+
+########################################################
+# Filesystem navigation
+########################################################
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+alias grep='grep --color=auto'
+alias df='df -h'
+alias du='du -h -c'
+alias lpath='echo $PATH | tr ":" "\n"'     # show PATH one entry per line
+
+# Remove broken symlinks in current directory
+alias clsym="find -L . -name . -o -type d -prune -o -type l -exec rm {} +"
+
+alias rmf="rm -rf"
+
+########################################################
+# File listing
+# Use eza if available, fall back to ls
+########################################################
+
+if [[ -x "$(command -v eza)" ]]; then
+  alias ll="eza --icons --git --long"
+  alias l="eza --icons --git --all --long"
+else
+  alias l="ls -lah --color=auto"
+  alias ll="ls -lFh --color=auto"
+fi
+
+alias la="ls -AF --color=auto"
+alias lld="ls -l | grep ^d"
+
+########################################################
+# Git shortcuts
+########################################################
+
+alias gs='git s'
+alias glog="git l"
+
+########################################################
+# Neovim
+########################################################
+
+if [[ -n "$(command -v nvim)" ]]; then
+    alias vim="nvim"
+    alias vimu="nvim --headless \"+Lazy! sync\" +qa"    # update plugins headlessly
+    alias vimg="nvim +Ge:"                               # open fugitive status
+fi
+
+########################################################
+# lazygit
+########################################################
+
+alias lg="lazygit"

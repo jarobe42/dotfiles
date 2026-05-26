@@ -1,0 +1,10 @@
+# Neovim plugin lockfile — regenerated on each sync, noisy in diffs
+config/nvim/lazy-lock.json
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor
+*.swp
+*~

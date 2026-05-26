@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+# Description: Update packages, Neovim plugins, dotfiles, and zsh plugins
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+  Update all the things.
+
+$(fmt_key "Commands:")
+    packages        Update system packages (pacman + paru)
+    nvim            Update Neovim plugins
+    dotfiles        Pull latest dotfiles from git
+    zsh             Update zsh plugins
+    all             Run all updates
+EOF
+}
+
+update_packages() {
+  fmt_title_underline "Updating system packages"
+
+  local log_file
+  log_file=$(mktemp)
+  trap 'rm -f "$log_file"' RETURN
+
+  run_with_spinner "sudo pacman -Syu --noconfirm > '$log_file' 2>&1" 11 "Updating pacman packages"
+
+  if grep -q "error\|Error\|failed\|Failed" "$log_file"; then
+    log_error "pacman update had errors:"
+    cat "$log_file"
+    exit 1
+  fi
+
+  log_success "pacman up to date"
+
+  if command -v paru &>/dev/null; then
+    run_with_spinner "paru -Sua --noconfirm > '$log_file' 2>&1" 11 "Updating AUR packages"
+    log_success "paru (AUR) up to date"
+  fi
+}
+
+update_nvim_plugins() {
+  fmt_title_underline "Updating Neovim plugins"
+
+  if ! command -v nvim &>/dev/null; then
+    log_warning "nvim not found, skipping"
+    return
+  fi
+
+  local log_file
+  log_file=$(mktemp)
+  trap 'rm -f "$log_file"' RETURN
+
+  run_with_spinner "nvim --headless '+Lazy! sync' +qa > '$log_file' 2>&1" 11 "Updating Neovim plugins"
+
+  if grep -q "Error\|ERROR\|Could not\|not installed" "$log_file"; then
+    log_error "Neovim plugin update had errors:"
+    cat "$log_file"
+    exit 1
+  fi
+
+  grep -i "updated\|installed\|removed" "$log_file" || log_info "No plugin updates found"
+  echo -e
+  log_success "Neovim plugins up to date"
+}
+
+update_dotfiles() {
+  fmt_title_underline "Updating dotfiles"
+
+  local current_branch
+  current_branch="$(git -C "$DOTFILES" symbolic-ref --short HEAD)"
+
+  if [ "$current_branch" != "main" ]; then
+    log_warning "Not on main branch (current: $current_branch), skipping pull"
+    return 1
+  fi
+
+  local log_file
+  log_file=$(mktemp)
+  trap 'rm -f "$log_file"' RETURN
+
+  run_with_spinner "git -C '$DOTFILES' fetch --quiet origin main > '$log_file' 2>&1" 11 "Checking for updates"
+
+  local local_rev remote_rev
+  local_rev=$(git -C "$DOTFILES" rev-parse HEAD)
+  remote_rev=$(git -C "$DOTFILES" rev-parse "@{u}" 2>/dev/null || echo "")
+
+  if [[ -z "$remote_rev" || "$local_rev" = "$remote_rev" ]]; then
+    log_info "Dotfiles are up to date"
+    return 0
+  fi
+
+  git -C "$DOTFILES" --no-pager log --oneline --graph --color=always HEAD.."@{u}"
+  run_with_spinner "git -C '$DOTFILES' pull --ff-only origin main > '$log_file' 2>&1" 11 "Pulling dotfiles"
+  log_success "Dotfiles updated"
+}
+
+update_zsh_plugins() {
+  fmt_title_underline "Updating zsh plugins"
+
+  local cwd
+  cwd="$(pwd)"
+
+  while IFS=: read -r name path; do
+    cd "$path" || continue
+
+    local before
+    before=$(git rev-parse HEAD)
+
+    run_with_spinner 'git pull --quiet --recurse-submodules' 11 "Updating $name"
+
+    local after
+    after=$(git rev-parse HEAD)
+
+    if [[ $before != $after ]]; then
+      local commit_count commit_msg
+      commit_count=$(git rev-list --count "$before".."$after")
+      commit_msg=$(git log -1 --pretty=format:"%s")
+      log_success "$name updated ($commit_count new commit(s))"
+      fmt_value "  → $commit_msg"
+    else
+      log_info "$name already up to date"
+    fi
+
+    cd "$cwd"
+  done < <(zsh -ic 'for k in ${(k)plugins}; do echo "$k:$plugins[$k]"; done' 2>/dev/null)
+
+  log_success "zsh plugins up to date"
+}
+
+main() {
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 0
+  fi
+
+  local verbose=false
+  local subcmd=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h | --help) usage; exit 0 ;;
+    -v | --verbose) verbose=true; shift ;;
+    *) subcmd="$1"; shift ;;
+    esac
+  done
+
+  case "$subcmd" in
+  packages)  update_packages ;;
+  nvim | vim) update_nvim_plugins ;;
+  dotfiles)  update_dotfiles ;;
+  zsh)       update_zsh_plugins ;;
+  all)
+    update_packages
+    update_nvim_plugins
+    update_zsh_plugins
+    update_dotfiles
+    ;;
+  *) log_error "Unknown command: $subcmd"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"

@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Description: Setup Git configuration personalised for you.
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+Setup Git configuration. Prompts for name, email, and GitHub username.
+Writes to ~/.gitconfig-local (not committed).
+
+$(fmt_key "Commands:")
+    setup    Configure git identity and credential helper
+EOF
+}
+
+setup_git() {
+  fmt_title_underline "Setting up Git configuration"
+
+  if ! command -v git &>/dev/null; then
+    log_error "git is not installed."
+    exit 1
+  fi
+
+  local_config="$HOME/.gitconfig-local"
+
+  defaultName=$(git config user.name 2>/dev/null || echo "")
+  defaultEmail=$(git config user.email 2>/dev/null || echo "")
+  defaultGithub=$(git config github.user 2>/dev/null || echo "")
+
+  read -rp "Name [$defaultName] " name
+  read -rp "Email [$defaultEmail] " email
+  read -rp "Github username [$defaultGithub] " github
+
+  git config -f "$local_config" user.name "${name:-$defaultName}"
+  git config -f "$local_config" user.email "${email:-$defaultEmail}"
+  git config -f "$local_config" github.user "${github:-$defaultGithub}"
+
+  # On Linux, offer credential store options
+  read -rn 1 -p "Credential helper: [s]tore (unencrypted file) / [c]ache (1h) / [1] 1password CLI? [s/c/1] " cred
+  echo
+  case "$cred" in
+  1)
+    git config -f "$local_config" credential.helper \
+      "!f() { echo username=git; echo password=\$(op read 'op://Private/GitHub/token'); }; f"
+    log_success "Credential helper set to 1Password CLI"
+    ;;
+  c)
+    git config -f "$local_config" credential.helper "cache --timeout 3600"
+    log_success "Credential helper set to cache (1h)"
+    ;;
+  *)
+    git config -f "$local_config" credential.helper "store"
+    log_warning "Credential helper set to store (plaintext ~/.git-credentials)"
+    ;;
+  esac
+
+  log_success "Git configured. Written to $local_config"
+}
+
+main() {
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 0
+  fi
+
+  case "$1" in
+  setup) setup_git ;;
+  -h | --help) usage ;;
+  *) log_error "Unknown command: $1"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"

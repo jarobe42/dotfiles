@@ -1,0 +1,83 @@
+/* Waybar stylesheet — Catppuccin Mocha palette */
+/* Reference: https://github.com/Alexays/Waybar/wiki/Styling */
+
+* {
+    font-family: "Monaspace Argon", "Symbols Nerd Font", monospace;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: #1e1e2e;  /* Catppuccin base */
+    color: #cdd6f4;              /* Catppuccin text */
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    padding: 0 8px;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    color: #6c7086;              /* subtext0 — inactive */
+    background: transparent;
+}
+
+#workspaces button.active {
+    color: #cba6f7;              /* mauve — active workspace */
+    font-weight: bold;
+}
+
+#workspaces button:hover {
+    color: #cdd6f4;
+    background: #313244;
+}
+
+#window {
+    color: #a6adc8;
+}
+
+#clock {
+    color: #89b4fa;             /* blue */
+    font-weight: bold;
+}
+
+#pulseaudio {
+    color: #a6e3a1;             /* green */
+}
+
+#pulseaudio.muted {
+    color: #f38ba8;             /* red */
+}
+
+#network {
+    color: #89dceb;             /* sky */
+}
+
+#network.disconnected {
+    color: #f38ba8;
+}
+
+#battery {
+    color: #a6e3a1;
+}
+
+#battery.warning {
+    color: #f9e2af;             /* yellow */
+}
+
+#battery.critical {
+    color: #f38ba8;             /* red */
+    animation: blink 0.5s steps(1) infinite;
+}
+
+@keyframes blink {
+    to { color: #1e1e2e; background-color: #f38ba8; }
+}
+
+#tray {
+    color: #cdd6f4;
+}

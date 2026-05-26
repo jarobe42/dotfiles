@@ -1,0 +1,45 @@
+# Core CLI tools — installed on any machine
+# Format: one package per line, comments stripped before passing to pacman
+
+# Shell
+zsh
+zsh-completions
+
+# Version control
+git
+git-delta                # better git diffs (used by lazygit + delta pager)
+lazygit                  # TUI git client
+github-cli               # gh command
+
+# Editor
+neovim
+stylua                   # Lua formatter (for nvim config)
+shellcheck               # shell script linter
+
+# Search & navigation
+ripgrep
+fd
+fzf
+zoxide                   # smarter cd
+
+# File viewing
+bat                      # better cat (also replaces glow/highlight for markdown)
+eza                      # better ls
+
+# Data tools
+jq
+yq                       # YAML/JSON/TOML processor
+
+# Python
+uv                       # Python version management + venv + tool installs
+
+# Node
+fnm                      # Node version manager
+
+# System
+btop                     # process monitor
+wget
+cloc                     # lines of code counter
+entr                     # run commands on file change
+gum                      # fancy shell UI primitives
+tree-sitter              # parser (neovim dependency)

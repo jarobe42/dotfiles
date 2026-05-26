@@ -1,0 +1,10 @@
+# Dev tooling — language servers, build tools, etc.
+# Populate as needed. Empty to start — add packages here as you install them
+# during normal work, then they're captured for the next bootstrap.
+
+# Example entries (uncomment or add as needed):
+# lua-language-server    # LSP for Lua (neovim config)
+# pyright                # Python LSP (or install via uv: uv tool install pyright)
+# prettier               # code formatter (or via npm: npm i -g prettier)
+# rustup                 # Rust toolchain manager
+# go                     # Go

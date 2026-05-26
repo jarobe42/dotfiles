@@ -1,0 +1,37 @@
+# Mako notification daemon config
+# Reference: man 5 mako
+
+# Appearance
+background-color=#1e1e2e       # Catppuccin base
+text-color=#cdd6f4             # Catppuccin text
+border-color=#cba6f7           # Catppuccin mauve
+border-size=2
+border-radius=8
+padding=12
+margin=8
+width=360
+height=150
+
+# Typography
+font=Monaspace Argon 12
+
+# Behaviour
+default-timeout=5000           # auto-dismiss after 5s (0 = never)
+ignore-timeout=0
+max-visible=5
+sort=-time                     # newest first
+
+# Icons
+icon-path=/usr/share/icons/hicolor
+max-icon-size=64
+
+# Urgency overrides
+[urgency=low]
+border-color=#6c7086
+
+[urgency=normal]
+border-color=#cba6f7
+
+[urgency=critical]
+border-color=#f38ba8
+default-timeout=0              # don't auto-dismiss critical notifications

@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+# Description: Install packages from packages/ lists using pacman and paru
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+PACKAGES_DIR="$DOTFILES/packages"
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+Install packages from the dotfiles package lists.
+
+$(fmt_key "Commands:")
+    install         Install all packages (default)
+    install <list>  Install a specific list (base, desktop, aur, dev)
+    list            Show all packages that would be installed
+    --dry-run       Print commands without running them
+
+EOF
+}
+
+# Strip comments and blank lines from a package list file
+parse_list() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  grep -v '^\s*#' "$file" | grep -v '^\s*$' | awk '{print $1}'
+}
+
+install_pacman() {
+  local list_file="$1"
+  local list_name
+  list_name=$(basename "$list_file" .txt)
+  [[ -f "$list_file" ]] || { log_warning "List not found: $list_file"; return; }
+
+  local packages
+  packages=$(parse_list "$list_file")
+  [[ -z "$packages" ]] && { log_info "No packages in $list_name"; return; }
+
+  fmt_title_underline "Installing $list_name packages (pacman)"
+
+  if [[ "${DRY_RUN:-}" == true ]]; then
+    log_info "[dry-run] sudo pacman -S --needed --noconfirm $packages"
+  else
+    # shellcheck disable=SC2086
+    sudo pacman -S --needed --noconfirm $packages
+  fi
+  log_success "$list_name done"
+}
+
+install_aur() {
+  local list_file="$1"
+  [[ -f "$list_file" ]] || { log_warning "AUR list not found: $list_file"; return; }
+
+  if ! command -v paru &>/dev/null; then
+    log_error "paru not found — run install.sh first to bootstrap paru"
+    exit 1
+  fi
+
+  local packages
+  packages=$(parse_list "$list_file")
+  [[ -z "$packages" ]] && { log_info "No packages in aur.txt"; return; }
+
+  fmt_title_underline "Installing AUR packages (paru)"
+
+  if [[ "${DRY_RUN:-}" == true ]]; then
+    log_info "[dry-run] paru -S --needed --noconfirm $packages"
+  else
+    # shellcheck disable=SC2086
+    paru -S --needed --noconfirm $packages
+  fi
+  log_success "AUR done"
+}
+
+cmd_list() {
+  for list in base desktop dev; do
+    local file="$PACKAGES_DIR/$list.txt"
+    [[ -f "$file" ]] || continue
+    fmt_title_underline "$list (pacman)"
+    parse_list "$file"
+    echo
+  done
+  fmt_title_underline "aur"
+  parse_list "$PACKAGES_DIR/aur.txt"
+}
+
+cmd_install() {
+  local target="${1:-all}"
+
+  case "$target" in
+  all)
+    install_pacman "$PACKAGES_DIR/base.txt"
+    install_pacman "$PACKAGES_DIR/desktop.txt"
+    install_pacman "$PACKAGES_DIR/dev.txt"
+    install_aur    "$PACKAGES_DIR/aur.txt"
+    ;;
+  base | desktop | dev)
+    install_pacman "$PACKAGES_DIR/$target.txt"
+    ;;
+  aur)
+    install_aur "$PACKAGES_DIR/aur.txt"
+    ;;
+  *)
+    log_error "Unknown list: $target (valid: base, desktop, dev, aur, all)"
+    exit 1
+    ;;
+  esac
+}
+
+main() {
+  local subcmd="install"
+  local DRY_RUN=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --dry-run) DRY_RUN=true; shift ;;
+    -h | --help) usage; exit 0 ;;
+    list | install) subcmd="$1"; shift ;;
+    *) break ;;
+    esac
+  done
+
+  export DRY_RUN
+
+  case "$subcmd" in
+  install) cmd_install "${1:-all}" ;;
+  list)    cmd_list ;;
+  esac
+}
+
+main "$@"

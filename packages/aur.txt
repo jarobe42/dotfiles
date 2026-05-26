@@ -1,0 +1,23 @@
+# AUR packages — installed via paru
+# These are not in the official Arch/CachyOS repos
+
+# Editors / IDEs
+visual-studio-code-bin   # VS Code (proprietary build; use codium for FOSS)
+
+# Notes + docs
+obsidian                 # note-taking (official Linux build via AUR)
+# notion is not worth installing — use the web app in Firefox
+
+# Password management
+1password                # 1Password desktop app
+1password-cli            # op CLI (used in shell scripts for secrets)
+
+# Music
+spotify                  # official Spotify client
+
+# Fonts
+ttf-monaspace            # Monaspace font family (preferred monospace)
+ttf-nerd-fonts-symbols   # nerd fonts symbols-only (used by neovim + terminal)
+
+# Terminal (if not available in official repos on this CachyOS version)
+# ghostty-bin            # uncomment if ghostty isn't in official/CachyOS repos

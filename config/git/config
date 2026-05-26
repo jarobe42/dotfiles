@@ -1,0 +1,160 @@
+# vim:ft=gitconfig
+[init]
+    defaultBranch = main
+
+[include]
+    # Personal identity and credential helper live here, not in this file.
+    # Created by: dot git setup
+    path = ~/.gitconfig-local
+
+########################################################
+# Core
+########################################################
+
+[core]
+    pager = delta
+    editor = nvim
+    whitespace = cr-at-eol
+    excludesfile = ~/.config/git/ignore
+
+[interactive]
+    diffFilter = delta --color-only
+
+########################################################
+# Delta (diff pager)
+########################################################
+
+[delta]
+    features = unobtrusive-line-numbers decorations
+    whitespace-error-style = 22 reverse
+    syntax-theme = base16-256
+
+[delta "unobtrusive-line-numbers"]
+    line-numbers = true
+    line-numbers-left-format = "{nm:>4}┊"
+    line-numbers-right-format = "{np:>4}│"
+    line-numbers-left-style = blue
+    line-numbers-right-style = blue
+
+[delta "decorations"]
+    commit-decoration-style = bold yellow box ul
+    file-style = bold yellow ul
+    file-decoration-style = none
+    hunk-header-decoration-style = yellow box
+
+########################################################
+# Aliases
+########################################################
+
+[alias]
+    la = "!git config -l | grep alias | cut -c 7-"
+
+    # Better diff — ignores whitespace, skips lock files
+    d = "!git diff --ignore-space-at-eol -b -w --ignore-blank-lines -- ':!**/package-lock.json' ':!**/yarn.lock'"
+
+    # Push new branch and set upstream
+    pnb = "!git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)"
+
+    co = checkout
+    s = status --short --branch
+    br = branch -v
+
+    # Amend without editing message
+    cane = commit --amend --no-edit
+
+    # Pretty log graph
+    l = log --graph --pretty=format:'%Cred%h%Creset %C(bold blue)%an%C(reset) - %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+
+    # What did I do today?
+    day = "!sh -c 'git log --reverse --no-merges --branches=* --date=local --after=\"yesterday 11:59PM\" --author=\"`git config --get user.name`\"'"
+
+    # Files by commit count (find churn)
+    churn = "!f() { git log --all -M -C --name-only --format='format:' \"$@\" | sort | grep -v '^$' | uniq -c | sort | awk 'BEGIN {print \"count\tfile\"} {print $1 \"\t\" $2}' | sort -g; }; f"
+
+    # Current branch name
+    cbr = rev-parse --abbrev-ref HEAD
+
+    # Undo last commit (keep changes staged)
+    undo = reset --soft HEAD~1
+    amend = commit -a --amend
+
+    # Clean up merged branches and stale remotes
+    cleanup = "!git remote prune origin && git gc && git clean -df && git stash clear"
+    forget = "!git fetch -p origin && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -D"
+
+    # Rebase shortcuts
+    cont = rebase --continue
+    continue = "!GIT_EDITOR=true git rebase --continue"
+
+    # Submodule shortcuts
+    si = submodule init
+    su = submodule update
+    sub = "!git submodule sync && git submodule update"
+
+    lt = describe --tags --abbrev=0
+
+    # Add but ignore whitespace changes
+    addnw = "!sh -c 'git diff -U0 -w --no-color \"$@\" | git apply --cached --ignore-whitespace --unidiff-zero -'"
+
+    # Open repo in browser (requires gh)
+    browse = "!gh repo view --web"
+
+    empty = commit --allow-empty
+
+########################################################
+# Behaviour
+########################################################
+
+[color]
+    diff = auto
+    status = auto
+    branch = auto
+    interactive = auto
+    ui = auto
+
+[color "branch"]
+    current = green bold
+    local = green
+    remote = red bold
+
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color "status"]
+    added = green bold
+    changed = yellow bold
+    untracked = red
+
+[push]
+    default = current
+
+[branch]
+    autosetuprebase = always
+
+[pull]
+    rebase = true
+
+[diff]
+    renames = copies
+    mnemonicprefix = true
+    compactionHeuristic = true
+
+[difftool]
+    prompt = false
+
+[apply]
+    whitespace = nowarn
+
+[rerere]
+    enabled = true
+
+[grep]
+    extendRegexp = true
+    lineNumber = true
+
+[rebase]
+    instructionFormat = "[%an - %ar] %s"
+    autoStash = true

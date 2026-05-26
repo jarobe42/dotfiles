@@ -1,0 +1,75 @@
+# Desktop / Wayland stack
+# Requires multilib repo enabled for steam
+
+# Compositor + window management
+niri                     # Wayland compositor (scrollable tiling)
+xdg-desktop-portal-gnome # desktop portal (file picker, screen capture)
+xdg-user-dirs            # standard home dirs (Documents, Downloads, etc.)
+
+# Status bar + notifications
+waybar                   # status bar
+mako                     # notification daemon
+
+# App launcher
+fuzzel                   # Wayland-native app launcher
+
+# Screenshot
+grim                     # screenshot tool
+slurp                    # region selection for grim
+
+# Clipboard
+wl-clipboard             # wl-copy / wl-paste
+cliphist                 # clipboard history manager
+
+# Screen lock + wallpaper
+swaylock                 # screen lock
+swaybg                   # wallpaper setter
+
+# Auth
+polkit-gnome             # authentication agent (sudo GUI prompts)
+
+# Audio (likely pre-installed on CachyOS, ensure present)
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
+pavucontrol              # audio control GUI
+
+# Qt Wayland support (needed for Qt apps to run natively on Wayland)
+qt5-wayland
+qt6-wayland
+
+# Terminal
+# ghostty                # PENDING DECISION: ghostty vs foot (see packages.md)
+# foot                   # Wayland-native, very lightweight
+ghostty                  # using ghostty — already familiar from Mac
+
+# Browser + general GUI
+firefox
+
+# Fonts
+# (see aur.txt for Monaspace and Nerd Fonts)
+
+# Media
+mpv                      # video player (better Wayland support than VLC)
+imv                      # image viewer (Wayland-native)
+
+# Documents
+zathura                  # keyboard-driven PDF viewer
+zathura-pdf-mupdf        # PDF backend for zathura
+
+# Bluetooth + networking
+blueman                  # Bluetooth manager GUI
+networkmanager           # network manager (likely pre-installed)
+network-manager-applet   # tray icon for NetworkManager
+
+# File manager
+thunar                   # GUI file manager (lightweight)
+
+# Games
+steam                    # requires multilib repo
+
+# Docker (native on Linux — no Colima needed)
+docker
+docker-compose
+docker-buildx

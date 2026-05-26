@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Description: Enable systemd user services
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+  Enable and start systemd user services needed for the desktop environment.
+
+$(fmt_key "Commands:")
+    enable      Enable all services (default)
+    status      Show status of managed services
+EOF
+}
+
+# Services to enable at the user level (systemctl --user)
+USER_SERVICES=(
+  pipewire
+  pipewire-pulse
+  wireplumber
+)
+
+cmd_enable() {
+  fmt_title_underline "Enabling systemd user services"
+
+  for service in "${USER_SERVICES[@]}"; do
+    if systemctl --user is-enabled "$service" &>/dev/null; then
+      log_info "$service already enabled"
+    else
+      systemctl --user enable --now "$service" && \
+        log_success "Enabled: $service" || \
+        log_warning "Failed to enable: $service"
+    fi
+  done
+
+  echo -e
+  log_success "Services done"
+  log_info "Note: Niri is launched by the display manager / login shell, not systemd user services"
+}
+
+cmd_status() {
+  fmt_title_underline "Systemd user service status"
+  for service in "${USER_SERVICES[@]}"; do
+    local status
+    status=$(systemctl --user is-active "$service" 2>/dev/null || echo "inactive")
+    if [[ "$status" == "active" ]]; then
+      log_success "$service: $status"
+    else
+      log_warning "$service: $status"
+    fi
+  done
+}
+
+main() {
+  local subcmd="${1:-enable}"
+  shift || true
+
+  case "$subcmd" in
+  enable) cmd_enable ;;
+  status) cmd_status ;;
+  -h | --help) usage ;;
+  *) log_error "Unknown command: $subcmd"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"

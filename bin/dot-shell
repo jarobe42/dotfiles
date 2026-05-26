@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# Description: Configure default shell and terminfo
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+  Configure the default shell and terminal capabilities.
+
+$(fmt_key "Commands:")
+    change      Set default shell to zsh
+    terminfo    Install terminfo entries for italic support
+EOF
+}
+
+cmd_change() {
+  fmt_title_underline "Configuring shell"
+
+  local zsh_path
+  zsh_path="$(command -v zsh)"
+
+  if [[ -z "$zsh_path" ]]; then
+    log_error "zsh not found. Install it first: sudo pacman -S zsh"
+    exit 1
+  fi
+
+  # Ensure zsh is in /etc/shells
+  if ! grep -qF "$zsh_path" /etc/shells; then
+    log_info "Adding $zsh_path to /etc/shells"
+    echo "$zsh_path" | sudo tee -a /etc/shells
+  fi
+
+  if [[ "$SHELL" != "$zsh_path" ]]; then
+    chsh -s "$zsh_path"
+    log_success "Default shell changed to $zsh_path"
+    log_info "Log out and back in for the change to take effect"
+  else
+    log_info "Default shell is already $zsh_path"
+  fi
+}
+
+cmd_terminfo() {
+  fmt_title_underline "Configuring terminfo"
+
+  local resources="$DOTFILES/resources"
+
+  if [[ -f "$resources/tmux.terminfo" ]]; then
+    log_info "Adding tmux.terminfo"
+    tic -x "$resources/tmux.terminfo"
+  fi
+
+  if [[ -f "$resources/xterm-256color-italic.terminfo" ]]; then
+    log_info "Adding xterm-256color-italic.terminfo"
+    tic -x "$resources/xterm-256color-italic.terminfo"
+  fi
+
+  log_success "terminfo done."
+}
+
+main() {
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 0
+  fi
+
+  case "$1" in
+  change)   cmd_change ;;
+  terminfo) cmd_terminfo ;;
+  -h | --help) usage ;;
+  *) log_error "Unknown command: $1"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"

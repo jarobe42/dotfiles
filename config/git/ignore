@@ -1,0 +1,20 @@
+# Global gitignore — applies to all repos on this machine
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# Editor
+.vimrc.local
+.vim/coc-settings.json
+
+# Tools
+tscommand*.txt
+npm-debug.log
+.envrc
+
+# Claude Code
+**/.claude/settings.local.json
+.claude/planning/
