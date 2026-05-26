@@ -24,7 +24,7 @@ input {
     }
 
     mouse {
-        natural-scroll false
+        // natural-scroll  // uncomment to enable (default: off)
     }
 }
 
