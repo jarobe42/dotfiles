@@ -35,3 +35,11 @@ export GIT_EDITOR='nvim'
 
 # uv and user-installed tools
 export PATH="$HOME/.local/bin:$PATH"
+
+# AWS — keep config in XDG dir alongside everything else
+# credentials are never stored on disk; fetched via 1Password credential_process
+export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
+export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
+
+# kubectl plugins installed via krew
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"

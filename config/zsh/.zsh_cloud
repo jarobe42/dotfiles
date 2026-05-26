@@ -1,0 +1,132 @@
+########################################################
+# Cloud tooling — kubectl, kubectx, AWS
+# Sourced from .zshrc when the tools are present
+########################################################
+
+
+# ── kubectl ───────────────────────────────────────────────────────────────
+
+if [[ -x "$(command -v kubectl)" ]]; then
+  alias k='kubectl'
+  alias kgp='kubectl get pods'
+  alias kgs='kubectl get services'
+  alias kgd='kubectl get deployments'
+  alias kgn='kubectl get nodes'
+  alias kgi='kubectl get ingress'
+  alias kga='kubectl get all'
+  alias kdp='kubectl describe pod'
+  alias kdd='kubectl describe deployment'
+  alias kl='kubectl logs'
+  alias klf='kubectl logs -f'
+  alias kex='kubectl exec -it'
+  alias kpf='kubectl port-forward'
+  alias kap='kubectl apply -f'
+  alias kdel='kubectl delete'
+  alias kctx='kubectx'
+  alias kns='kubens'
+
+  # Show decoded secret (requires kubectl view-secret via krew)
+  # kubectl krew install view-secret
+  if kubectl krew version &>/dev/null 2>&1 && kubectl view-secret --help &>/dev/null 2>&1; then
+    alias ksec='kubectl view-secret'
+  else
+    # Fallback: decode all values in a secret inline
+    ksec() {
+      kubectl get secret "$1" ${2:+-n "$2"} -o json \
+        | jq '.data | map_values(@base64d)'
+    }
+  fi
+
+  # Enable tab completion for k alias
+  # (loads kubectl completion lazily on first use to keep shell startup fast)
+  _kubectl_completion_loaded=false
+  k() {
+    if [[ "$_kubectl_completion_loaded" == false ]]; then
+      source <(kubectl completion zsh)
+      complete -F __start_kubectl k
+      _kubectl_completion_loaded=true
+    fi
+    kubectl "$@"
+  }
+fi
+
+# ── kubectx / kubens ──────────────────────────────────────────────────────
+
+if [[ -x "$(command -v kubectx)" ]]; then
+  # fzf-backed interactive context/namespace switching if fzf is available
+  if [[ -x "$(command -v fzf)" ]]; then
+    export KUBECTX_CURRENT_FGCOLOR=$(tput setaf 6 2>/dev/null)
+    export KUBECTX_CURRENT_BGCOLOR=$(tput setaf 0 2>/dev/null)
+  fi
+fi
+
+# ── k9s ───────────────────────────────────────────────────────────────────
+
+if [[ -x "$(command -v k9s)" ]]; then
+  alias k9='k9s'
+fi
+
+# ── stern ─────────────────────────────────────────────────────────────────
+
+if [[ -x "$(command -v stern)" ]]; then
+  # stern: multi-pod log tailing
+  # Usage: klogs <selector>  e.g. klogs app=api  or  klogs -n prod api
+  alias klogs='stern'
+fi
+
+# ── helm ──────────────────────────────────────────────────────────────────
+
+if [[ -x "$(command -v helm)" ]]; then
+  source <(helm completion zsh)
+fi
+
+# ── AWS ───────────────────────────────────────────────────────────────────
+
+if [[ -x "$(command -v aws)" ]]; then
+  # Quickly switch the AWS_PROFILE env var
+  # Usage: ap work   (sets AWS_PROFILE=work for the session)
+  ap() {
+    if [[ -z "${1:-}" ]]; then
+      echo "Current profile: ${AWS_PROFILE:-default}"
+      echo "Available profiles:"
+      aws configure list-profiles
+    else
+      export AWS_PROFILE="$1"
+      echo "AWS_PROFILE set to: $AWS_PROFILE"
+    fi
+  }
+
+  # Print current caller identity (who am I in AWS?)
+  alias awsme='aws sts get-caller-identity'
+
+  # List S3 buckets
+  alias s3ls='aws s3 ls'
+
+  # Open AWS console for the current profile in the browser
+  # (requires xdg-open on Linux)
+  awsconsole() {
+    local region="${AWS_DEFAULT_REGION:-$(aws configure get region)}"
+    xdg-open "https://${region}.console.aws.amazon.com" 2>/dev/null \
+      || echo "https://${region}.console.aws.amazon.com"
+  }
+fi
+
+# ── Kube context in prompt ─────────────────────────────────────────────────
+# Appends current kube context + namespace to RPROMPT when inside a
+# kube-relevant directory (has k8s/ or kube/ subdir, or a kubeconfig).
+# Keep it opt-in — don't pollute the prompt everywhere.
+
+_kube_prompt() {
+  [[ -x "$(command -v kubectl)" ]] || return
+  local ctx ns
+  ctx=$(kubectl config current-context 2>/dev/null) || return
+  ns=$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)
+  [[ -z "$ns" ]] && ns="default"
+  echo " ⎈ ${ctx}/${ns}"
+}
+
+# Uncomment to always show kube context in RPROMPT:
+# add-zsh-hook precmd _append_kube_rprompt
+# _append_kube_rprompt() {
+#   RPROMPT="$(_kube_prompt)$(suspended_jobs)"
+# }

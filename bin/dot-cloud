@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# Description: Set up cloud tooling (AWS + Kubernetes)
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+  Set up AWS and Kubernetes tooling.
+
+$(fmt_key "Commands:")
+    setup       Run all setup steps
+    aws         Set up AWS config only
+    kube        Set up Kubernetes tooling only
+    krew        Install kubectl krew plugin manager
+EOF
+}
+
+cmd_aws() {
+  fmt_title_underline "AWS setup"
+
+  if ! command -v aws &>/dev/null; then
+    log_warning "aws CLI not installed — run dot-packages install first"
+    return 1
+  fi
+
+  log_success "aws CLI found: $(aws --version 2>&1 | head -1)"
+
+  # Ensure AWS config dir exists (created by dot link, but verify)
+  local aws_config="${AWS_CONFIG_FILE:-$HOME/.aws/config}"
+  if [[ -f "$aws_config" || -L "$aws_config" ]]; then
+    log_success "AWS config at $aws_config"
+  else
+    log_warning "AWS config not found at $aws_config"
+    log_info "Run: dot link aws   (to link config/aws/ into place)"
+  fi
+
+  # Check 1Password CLI is available
+  if ! command -v op &>/dev/null; then
+    log_warning "1Password CLI (op) not found — credential_process won't work"
+    log_info "Install: see packages/aur.txt for 1password-cli"
+  else
+    log_success "1Password CLI found"
+    log_info "To test a profile:  aws sts get-caller-identity --profile <name>"
+  fi
+
+  # Ensure aws-op-credentials is executable and in PATH
+  local helper="$DOTFILES/bin/aws-op-credentials"
+  if [[ -x "$helper" ]]; then
+    log_success "aws-op-credentials helper in PATH via \$DOTFILES/bin"
+  fi
+
+  echo -e
+  log_info "Next steps:"
+  log_info "  1. Open ~/.config/aws/config and uncomment/add your profiles"
+  log_info "  2. For each profile, store credentials in 1Password with fields:"
+  log_info "       access_key_id  /  secret_access_key"
+  log_info "  3. Test: aws sts get-caller-identity --profile <name>"
+}
+
+cmd_kube() {
+  fmt_title_underline "Kubernetes tooling"
+
+  local tools=(kubectl kubectx k9s helm stern)
+  local missing=()
+
+  for tool in "${tools[@]}"; do
+    if command -v "$tool" &>/dev/null; then
+      log_success "$tool found"
+    else
+      log_warning "$tool not found"
+      missing+=("$tool")
+    fi
+  done
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    log_info "Missing tools: ${missing[*]}"
+    log_info "Run: dot-packages install  (installs from packages/cloud.txt)"
+  fi
+
+  # kubectl completion
+  if command -v kubectl &>/dev/null; then
+    log_info "kubectl completion is lazy-loaded in .zsh_cloud on first use"
+  fi
+
+  echo -e
+  log_info "Recommended krew plugins (install after krew is set up):"
+  log_info "  kubectl krew install view-secret   # decode secrets inline"
+  log_info "  kubectl krew install neat          # cleaner kubectl output"
+}
+
+cmd_krew() {
+  fmt_title_underline "Installing krew (kubectl plugin manager)"
+
+  if kubectl krew version &>/dev/null 2>&1; then
+    log_info "krew already installed"
+    return 0
+  fi
+
+  if ! command -v kubectl &>/dev/null; then
+    log_error "kubectl not found — install it first"
+    return 1
+  fi
+
+  log_info "Installing krew..."
+
+  (
+    set -x
+    OS="$(uname | tr '[:upper:]' '[:lower:]')"
+    ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')"
+    KREW="krew-${OS}_${ARCH}"
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    curl -fsSL "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" \
+      | tar -xzC "$tmpdir"
+    "$tmpdir/${KREW}" install krew
+  )
+
+  log_success "krew installed"
+  log_info "Restart your shell or run: export PATH=\"\${KREW_ROOT:-\$HOME/.krew}/bin:\$PATH\""
+  log_info ""
+  log_info "Then install recommended plugins:"
+  log_info "  kubectl krew install view-secret neat"
+}
+
+cmd_setup() {
+  cmd_aws
+  echo -e
+  cmd_kube
+}
+
+main() {
+  local subcmd="${1:-setup}"
+  shift || true
+
+  case "$subcmd" in
+  setup) cmd_setup ;;
+  aws)   cmd_aws ;;
+  kube)  cmd_kube ;;
+  krew)  cmd_krew ;;
+  -h | --help) usage ;;
+  *) log_error "Unknown command: $subcmd"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"

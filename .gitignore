@@ -1,6 +1,9 @@
 # Neovim plugin lockfile — regenerated on each sync, noisy in diffs
 config/nvim/lazy-lock.json
 
+# AWS credentials — managed via 1Password, never stored on disk
+config/aws/credentials
+
 # macOS
 .DS_Store
 **/.DS_Store

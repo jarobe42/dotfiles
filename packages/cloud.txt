@@ -1,0 +1,24 @@
+# Cloud & Kubernetes tools
+
+# ── Kubernetes ──────────────────────────────────────────────────────────────
+
+kubectl               # core CLI
+kubectx               # kubectx + kubens — context and namespace switching
+k9s                   # TUI dashboard
+helm                  # package manager for K8s
+
+# ── AWS ─────────────────────────────────────────────────────────────────────
+
+aws-cli               # AWS CLI v2
+
+# ── Log tailing ─────────────────────────────────────────────────────────────
+
+# stern: multi-pod log tailing — replaces `kubectl logs` for multi-container work
+# AUR: stern  (add to aur.txt)
+
+# ── Post-install: kubectl plugins via krew ───────────────────────────────────
+# Install krew first:  https://krew.sigs.k8s.io/docs/user-guide/setup/install/
+# Then:
+#   kubectl krew install view-secret   # replaces k8sec — decodes secrets inline
+#   kubectl krew install neat          # removes managed fields clutter from output
+#   kubectl krew install ctx           # alternative to kubectx if preferred

@@ -1,0 +1,34 @@
+# AWS CLI config
+# Credentials are never stored here — fetched from 1Password at runtime
+# via credential_process. See bin/aws-op-credentials.
+#
+# How to set up a new profile:
+#   1. Store the AWS keys in 1Password as an item with fields:
+#        access_key_id      (the AKIA... key)
+#        secret_access_key  (the secret)
+#        session_token      (optional, for temporary/assume-role creds)
+#   2. Add a [profile] block below pointing to the item name.
+#   3. Test: aws sts get-caller-identity --profile <name>
+
+[default]
+region = eu-west-2
+output = json
+
+# ── Profiles ──────────────────────────────────────────────────────────────
+# Uncomment and fill in the 1Password item name for each profile.
+
+# [profile personal]
+# region = eu-west-2
+# credential_process = aws-op-credentials "AWS - Personal"
+
+# [profile work]
+# region = eu-west-1
+# credential_process = aws-op-credentials "AWS - Work"
+
+# ── Assume-role profiles ───────────────────────────────────────────────────
+# If you assume a role from a source profile:
+
+# [profile work-admin]
+# role_arn = arn:aws:iam::123456789012:role/AdminRole
+# source_profile = work
+# region = eu-west-1

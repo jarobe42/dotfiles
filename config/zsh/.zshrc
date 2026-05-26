@@ -176,6 +176,6 @@ export LESS_TERMCAP_mh=$(tput dim)
 # Source remaining config files
 ########################################################
 
-for file in "$ZDOTDIR/.zsh_prompt" "$ZDOTDIR/.zsh_aliases"; do
+for file in "$ZDOTDIR/.zsh_prompt" "$ZDOTDIR/.zsh_aliases" "$ZDOTDIR/.zsh_cloud"; do
     [[ -f $file ]] && source $file
 done
