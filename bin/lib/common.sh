@@ -122,12 +122,12 @@ spinner() {
   esac
 
   # Hide cursor
-  tput civis
+  [[ -t 1 && -n "${TERM:-}" ]] && tput civis 2>/dev/null || true
 
   # Cleanup function to restore cursor and remove spinner
   cleanup() {
-    tput cnorm # Restore cursor
-    tput el    # Clear line
+    [[ -t 1 && -n "${TERM:-}" ]] && tput cnorm 2>/dev/null || true
+    [[ -t 1 && -n "${TERM:-}" ]] && tput el 2>/dev/null || true
     echo -en "\r${RESET}"
   }
   trap cleanup EXIT SIGINT SIGTERM
