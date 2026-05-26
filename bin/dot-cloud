@@ -24,7 +24,7 @@ cmd_aws() {
 
   if ! command -v aws &>/dev/null; then
     log_warning "aws CLI not installed — run dot-packages install first"
-    return 1
+    return 0
   fi
 
   log_success "aws CLI found: $(aws --version 2>&1 | head -1)"
@@ -101,8 +101,8 @@ cmd_krew() {
   fi
 
   if ! command -v kubectl &>/dev/null; then
-    log_error "kubectl not found — install it first"
-    return 1
+    log_warning "kubectl not found — install it first (dot-packages install)"
+    return 0
   fi
 
   log_info "Installing krew..."

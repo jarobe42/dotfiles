@@ -32,6 +32,7 @@ typeset -aU path
 
 export EDITOR='nvim'
 export GIT_EDITOR='nvim'
+export TERMINAL='ghostty'
 
 # uv and user-installed tools
 export PATH="$HOME/.local/bin:$PATH"

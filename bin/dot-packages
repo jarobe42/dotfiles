@@ -26,7 +26,7 @@ EOF
 parse_list() {
   local file="$1"
   [[ -f "$file" ]] || return 0
-  grep -v '^\s*#' "$file" | grep -v '^\s*$' | awk '{print $1}'
+  awk '!/^\s*#/ && !/^\s*$/ {print $1}' "$file"
 }
 
 install_pacman() {
@@ -65,13 +65,26 @@ install_aur() {
 
   fmt_title_underline "Installing AUR packages (paru)"
 
-  if [[ "${DRY_RUN:-}" == true ]]; then
-    log_info "[dry-run] paru -S --needed --noconfirm $packages"
+  local failed=()
+  while IFS= read -r pkg; do
+    [[ -z "$pkg" ]] && continue
+    if [[ "${DRY_RUN:-}" == true ]]; then
+      log_info "[dry-run] paru -S --needed --noconfirm $pkg"
+    else
+      if paru -S --needed --noconfirm "$pkg"; then
+        log_success "$pkg installed"
+      else
+        log_warning "$pkg failed — skipping"
+        failed+=("$pkg")
+      fi
+    fi
+  done <<< "$packages"
+
+  if [[ ${#failed[@]} -gt 0 ]]; then
+    log_warning "AUR done (failed: ${failed[*]})"
   else
-    # shellcheck disable=SC2086
-    paru -S --needed --noconfirm $packages
+    log_success "AUR done"
   fi
-  log_success "AUR done"
 }
 
 cmd_list() {

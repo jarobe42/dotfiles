@@ -15,7 +15,7 @@ font-size = 14
 # Run: ghostty +list-themes
 ########################################################
 
-theme = catppuccin-mocha
+theme = Catppuccin Mocha
 
 # Transparent background (requires compositor support)
 background-opacity = 0.95

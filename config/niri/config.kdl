@@ -10,11 +10,9 @@
 input {
     keyboard {
         xkb {
-            layout "us"
+            layout "gb,us"
             // options "caps:escape"  // remap Caps Lock to Escape
         }
-        repeat-delay 250
-        repeat-rate 35
     }
 
     touchpad {
@@ -24,7 +22,7 @@ input {
     }
 
     mouse {
-        natural-scroll false
+        // natural-scroll  // uncomment to enable (default: off)
     }
 }
 
@@ -88,6 +86,11 @@ window-rule {
     open-floating true
 }
 
+window-rule {
+    match app-id="com.mitchellh.ghostty"
+    default-column-width { proportion 0.85; }
+}
+
 // window-rule {
 //     match app-id="1password"
 //     open-floating true
@@ -106,9 +109,6 @@ binds {
 
     // Lock screen
     Mod+Ctrl+L { spawn "swaylock"; }
-
-    // Reload config
-    Mod+Shift+R { reload-config; }
 
     // Quit niri (shows confirmation)
     Mod+Shift+E { quit; }
@@ -157,10 +157,6 @@ binds {
     // Fullscreen / float
     Mod+F       { maximize-column; }
     Mod+Shift+F { toggle-window-floating; }
-
-    // Scroll viewport without changing focus
-    Mod+Ctrl+H { scroll-left; }
-    Mod+Ctrl+L { scroll-right; }
 
     // Jump to edges
     Mod+Home { focus-column-first; }
