@@ -39,7 +39,7 @@ cmd_enable() {
 
   echo -e
   log_success "Services done"
-  log_info "Note: Niri is launched by the display manager / login shell, not systemd user services"
+  log_info "Note: GNOME is launched by the display manager / login shell, not systemd user services"
 }
 
 cmd_status() {

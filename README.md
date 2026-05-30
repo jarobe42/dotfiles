@@ -80,7 +80,7 @@ dot clean                     # remove broken symlinks
 
 **Linking a single package:**
 ```bash
-dot link niri       # links config/niri → ~/.config/niri
+dot link gnome      # links config/gnome → ~/.config/gnome
 dot link zsh        # links config/zsh  → ~/.config/zsh
 ```
 

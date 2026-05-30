@@ -24,7 +24,7 @@ background-opacity = 0.95
 window-padding-x = 10
 window-padding-y = 8
 
-# No decorations (niri handles window chrome)
+# No decorations (GNOME handles window chrome)
 window-decoration = false
 
 ########################################################
