@@ -151,7 +151,16 @@ run dot-gnome setup
 success "GNOME ready"
 
 ########################################################
-# Phase 9: Krew (kubectl plugin manager)
+# Phase 9: Keyboard (keyd + xkb layout)
+########################################################
+
+header "Keyboard"
+
+run dot-keyboard setup
+success "Keyboard configured"
+
+########################################################
+# Phase 10: Krew (kubectl plugin manager)
 ########################################################
 
 header "Krew (kubectl plugin manager)"
@@ -177,11 +186,12 @@ Manual steps still required:
   3. Install neovim plugins on first launch:
      nvim  (lazy.nvim will run automatically)
 
-  4. Configure keyboard layout:
-     Settings > Keyboard > Input Sources
-
-  5. Albert launches automatically (Meta+D) — enable desired plugins
+  4. Albert launches automatically (Meta+D) — enable desired plugins
      via the Albert settings on first run
+
+  5. Keychron K15 Pro: set the hardware switch to Mac mode on both Mac and Linux.
+     keyd intercepts Super (physical Cmd key) and remaps it to Ctrl for app shortcuts.
+     Run 'dot-keyboard status' to verify keyd is active.
 
   6. Authenticate 1Password and sign in to sync credentials
 

@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Description: Configure keyboard remapping (keyd) and xkb layout
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+if is_mac; then
+  log_error "dot-keyboard is Linux-only — no action needed on macOS"
+  exit 0
+fi
+
+KEYD_CONF_SRC="$DOTFILES/config/linux/keyd/default.conf"
+KEYD_CONF_DEST="/etc/keyd/default.conf"
+
+# UK Mac xkb variant: Shift+2=@ (matches macOS British layout)
+# Verify available variants with: localectl list-x11-keymap-variants gb
+XKB_SOURCE="[('xkb', 'gb+mac')]"
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+  Configure keyboard remapping and layout for Mac/Linux parity.
+
+$(fmt_key "Commands:")
+    setup       Install keyd config, enable service, set xkb layout (default)
+    status      Show keyd service status and current xkb layout
+EOF
+}
+
+cmd_setup() {
+  fmt_title_underline "Keyboard setup"
+
+  # --- keyd config ---
+  if ! command -v keyd &>/dev/null; then
+    log_warning "keyd not installed — run 'dot packages install' first"
+  else
+    log_info "Installing keyd config → $KEYD_CONF_DEST"
+    sudo mkdir -p /etc/keyd
+    sudo ln -sf "$KEYD_CONF_SRC" "$KEYD_CONF_DEST"
+    log_success "keyd config linked"
+
+    if sudo systemctl is-enabled keyd &>/dev/null; then
+      log_info "keyd already enabled — reloading"
+      sudo systemctl reload-or-restart keyd
+    else
+      sudo systemctl enable --now keyd
+      log_success "keyd enabled and started"
+    fi
+  fi
+
+  # --- xkb layout (GNOME) ---
+  if command -v gsettings &>/dev/null; then
+    local current
+    current=$(gsettings get org.gnome.desktop.input-sources sources 2>/dev/null || echo "")
+    if [[ "$current" == "$XKB_SOURCE" ]]; then
+      log_info "xkb layout already set to UK Mac variant"
+    else
+      gsettings set org.gnome.desktop.input-sources sources "$XKB_SOURCE"
+      log_success "xkb layout set to UK Mac variant (Shift+2=@)"
+      log_info "  Log out and back in for the layout change to take full effect"
+    fi
+  else
+    log_warning "gsettings not available — set keyboard layout manually:"
+    log_info "  Settings > Keyboard > Input Sources → English (UK, Macintosh)"
+  fi
+
+  echo -e
+  log_success "Keyboard setup done"
+}
+
+cmd_status() {
+  fmt_title_underline "Keyboard status"
+
+  # keyd
+  if command -v keyd &>/dev/null; then
+    local svc_status
+    svc_status=$(sudo systemctl is-active keyd 2>/dev/null || echo "inactive")
+    if [[ "$svc_status" == "active" ]]; then
+      log_success "keyd: $svc_status"
+    else
+      log_warning "keyd: $svc_status"
+    fi
+
+    if [[ -L "$KEYD_CONF_DEST" ]]; then
+      log_info "  config: $KEYD_CONF_DEST → $(readlink "$KEYD_CONF_DEST")"
+    elif [[ -f "$KEYD_CONF_DEST" ]]; then
+      log_warning "  config: $KEYD_CONF_DEST (not a symlink — run 'dot-keyboard setup')"
+    else
+      log_warning "  config: not installed at $KEYD_CONF_DEST"
+    fi
+  else
+    log_warning "keyd: not installed"
+  fi
+
+  # xkb
+  if command -v gsettings &>/dev/null; then
+    local layout
+    layout=$(gsettings get org.gnome.desktop.input-sources sources 2>/dev/null || echo "unknown")
+    log_info "xkb sources: $layout"
+  fi
+}
+
+main() {
+  local subcmd="${1:-setup}"
+  shift || true
+
+  case "$subcmd" in
+  setup)  cmd_setup ;;
+  status) cmd_status ;;
+  -h | --help) usage ;;
+  *) log_error "Unknown command: $subcmd"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"

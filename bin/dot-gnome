@@ -54,8 +54,7 @@ cmd_setup() {
   log_info ""
   log_info "Manual steps:"
   log_info "  1. Log out and select 'GNOME' from the display manager (GDM)"
-  log_info "  2. Open Settings > Keyboard to configure input sources / layouts"
-  log_info "  3. Albert launches on login (autostart=true) — trigger with Meta+D"
+  log_info "  2. Albert launches on login (autostart=true) — trigger with Meta+D"
 }
 
 main() {

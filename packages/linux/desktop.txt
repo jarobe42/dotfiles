@@ -57,6 +57,9 @@ thunar
 # Games
 steam                    # requires multilib repo
 
+# Keyboard
+keyd                     # kernel-level key remapper (Super→Ctrl for mac-like shortcuts)
+
 # Docker (native on Linux — no Colima needed)
 docker
 docker-compose
