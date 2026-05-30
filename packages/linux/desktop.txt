@@ -40,7 +40,8 @@ zed                      # fast, modern editor with native Claude assistant
 firefox
 
 # Fonts
-# (see aur.txt for Monaspace and Nerd Fonts)
+otf-monaspace                # Monaspace font family (official extra repo)
+ttf-nerd-fonts-symbols-mono  # Nerd Font symbols (icons for prompt/nvim)
 
 # Media
 mpv                      # video player (better Wayland support than VLC)

@@ -15,9 +15,6 @@ obsidian                 # note-taking (official Linux build via AUR)
 # Music
 spotify                  # official Spotify client
 
-# Fonts
-ttf-monaspace            # Monaspace font family
-ttf-nerd-fonts-symbols-mono  # Nerd Font symbols (icons for prompt/nvim)
 
 # Terminal (if not available in official repos on this CachyOS version)
 # ghostty-bin            # uncomment if ghostty isn't in official/CachyOS repos
