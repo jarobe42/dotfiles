@@ -2,18 +2,20 @@
 
 ## Purpose
 
-This repo is the single source of truth for setting up a personal Linux
-environment (CachyOS + GNOME) from scratch. A fresh machine should be fully
-productive after running one command:
+This repo is the single source of truth for setting up a personal environment
+on both **Linux (CachyOS + GNOME)** and **macOS** from scratch. A fresh machine
+should be fully productive after running one command:
 
 ```bash
 bash install.sh
 ```
 
+`install.sh` detects the platform and delegates to `install-linux.sh` or
+`install-mac.sh` automatically.
+
 "Fully productive" means: shell configured, editor working with plugins, git
-set up, cloud tools (AWS + kubectl) authenticated, desktop running, all
-preferred apps installed. Nothing should require manual hunting after the
-bootstrap completes.
+set up, cloud tools (AWS + kubectl) authenticated, all preferred apps installed.
+Nothing should require manual hunting after the bootstrap completes.
 
 ---
 
@@ -37,8 +39,8 @@ maintained alternative. Find it.
 
 - `install.sh` must be **idempotent** — safe to run multiple times on the
   same machine without side effects
-- Package lists (`packages/*.txt`) are the canonical record of what should
-  be installed. If you install something manually, add it to the right list
+- Package lists are the canonical record of what should be installed. If you
+  install something manually, add it to the right list
 - Don't hard-code usernames, hostnames, or absolute paths. Use `$HOME`,
   `$XDG_CONFIG_HOME`, `$DOTFILES`
 - Machine-specific config belongs in `.zshrc.local` or `.gitconfig-local`,
@@ -69,25 +71,33 @@ having one extra package installed.
 
 ```
 dotfiles/
-├── install.sh              # bootstrap entry point — run this on a new machine
+├── install.sh              # platform-detecting entry point
+├── install-linux.sh        # CachyOS/Arch bootstrap
+├── install-mac.sh          # macOS bootstrap
 ├── bin/
 │   ├── dot                 # symlink manager (link/unlink/backup/clean)
 │   ├── dot-*               # subcommands — each is a discrete setup phase
 │   ├── aws-op-credentials  # 1Password-backed AWS credential_process helper
-│   └── lib/common.sh       # shared logging, colours, spinner
-├── config/                 # all configs symlinked into ~/.config/ via dot link
-│   ├── albert/             # app launcher (Meta+D)
-│   ├── zsh/                # shell (.zshenv, .zshrc, .zsh_aliases, .zsh_cloud…)
-│   ├── nvim/               # neovim (nisi.setup via lazy.nvim)
-│   ├── git/                # git config (no personal identity — set via dot git setup)
-│   ├── aws/                # AWS CLI config (credential_process, no stored secrets)
-│   └── …
+│   └── lib/common.sh       # shared logging, colours, spinner, is_mac/is_linux
+├── config/
+│   ├── shared/             # linked on both platforms
+│   │   ├── zsh/            # shell (.zshenv, .zshrc, .zsh_aliases, .zsh_cloud…)
+│   │   ├── nvim/           # neovim (nisi.setup via lazy.nvim)
+│   │   ├── git/            # git config (no personal identity — set via dot git setup)
+│   │   ├── aws/            # AWS CLI config (credential_process, no stored secrets)
+│   │   └── …
+│   ├── linux/              # Linux-only configs
+│   │   └── albert/         # app launcher (Meta+D)
+│   └── mac/                # macOS-only configs (empty — add as needed)
 └── packages/
-    ├── base.txt            # core CLI tools
-    ├── desktop.txt         # Wayland stack + GUI apps
-    ├── cloud.txt           # kubectl, helm, k9s, aws-cli, etc.
-    ├── aur.txt             # AUR-only packages
-    └── dev.txt             # language toolchains (populate as needed)
+    ├── linux/
+    │   ├── base.txt        # core CLI tools
+    │   ├── desktop.txt     # Wayland stack + GUI apps
+    │   ├── cloud.txt       # kubectl, helm, k9s, aws-cli, etc.
+    │   ├── aur.txt         # AUR-only packages
+    │   └── dev.txt         # language toolchains (populate as needed)
+    └── mac/
+        └── Brewfile        # all macOS packages (brew + cask + fonts)
 ```
 
 ---
@@ -96,54 +106,55 @@ dotfiles/
 
 ### Adding a package
 
-1. Add to the appropriate `packages/*.txt` file with a comment explaining why
-2. If it's AUR-only, it goes in `aur.txt`
-3. If it's cloud/K8s tooling, it goes in `cloud.txt`
-4. Validate: `bash install.sh --dry-run`
+**Linux:** Add to the appropriate `packages/linux/*.txt` file with a comment.
+AUR-only goes in `aur.txt`. Cloud/K8s tooling goes in `cloud.txt`.
+
+**macOS:** Add to `packages/mac/Brewfile` — `brew` for CLI tools, `cask` for
+GUI apps, fonts use `cask "font-*"`.
+
+**Validate:** `bash install.sh --dry-run`
 
 ### Adding a config
 
-1. Create `config/<tool>/` with the config file(s)
-2. `dot link <tool>` — or just `dot link all` (it skips already-linked)
-3. Test it. The config should work on first boot without further editing
+1. Decide if it's shared (both platforms), linux-only, or mac-only
+2. Create `config/shared/<tool>/`, `config/linux/<tool>/`, or `config/mac/<tool>/`
+3. `dot link <tool>` — or just `dot link all` (skips already-linked)
+4. Test it. The config should work on first boot without further editing
    (use sensible defaults; let `.local` files handle overrides)
 
 ### Adding a new `dot-*` subcommand
 
 1. Create `bin/dot-<name>` — executable bash script
-2. Source `$DOTFILES/bin/lib/common.sh` for logging functions
+2. Source `$DOTFILES/bin/lib/common.sh` for logging functions and `is_mac`/`is_linux`
 3. Include a `# Description: ...` comment on line 2 (shown in `dot help`)
-4. If it's a bootstrap phase, add it to `install.sh`
-5. If it's a setup/config phase, call it from `install.sh` or document it
-   as a post-install step
+4. If platform-specific, guard with `is_mac` or `is_linux` at the top
+5. If it's a bootstrap phase, add it to the appropriate `install-*.sh`
 
-### Modifying install.sh
+### Modifying install scripts
 
 - Each phase uses `run <cmd>` — this respects `--dry-run` automatically
 - Phases should be idempotent (`command -v foo` checks, `--needed` flags, etc.)
-- Order matters: packages before dotfiles, dotfiles before shell change,
-  services after desktop stack
+- `install-linux.sh`: packages → dotfiles → shell → git → services → GNOME → krew
+- `install-mac.sh`: homebrew → packages → dotfiles → shell → git → krew
 
 ---
 
 ## Testing
 
-Before committing changes, validate in Docker:
-
+**Linux — Docker dry-run:**
 ```bash
-# Dry-run: check install.sh logic without touching the system
 docker run --rm --platform linux/amd64 \
   -v "$(pwd):/dotfiles" \
   -e DOTFILES=/dotfiles \
   archlinux:latest \
-  bash -c "export PATH=/dotfiles/bin:\$PATH && bash /dotfiles/install.sh --dry-run"
+  bash -c "export PATH=/dotfiles/bin:\$PATH && bash /dotfiles/install-linux.sh --dry-run"
+```
 
-# Link test: verify all symlinks are created correctly
-docker run --rm --platform linux/amd64 \
-  -v "$(pwd):/dotfiles" \
-  -e DOTFILES=/dotfiles -e HOME=/root \
-  archlinux:latest \
-  bash -c "export PATH=/dotfiles/bin:\$PATH && mkdir -p /root/.config && dot link all -v"
+**macOS — link test (on this machine):**
+```bash
+export DOTFILES=/path/to/dotfiles
+export PATH="$DOTFILES/bin:$PATH"
+dot link all --verbose
 ```
 
 Both should exit 0. If they don't, fix before committing.
@@ -153,9 +164,8 @@ Both should exit 0. If they don't, fix before committing.
 ## What this repo does NOT do
 
 - Store secrets — credentials live in 1Password, fetched at runtime
-- Manage dotfiles for macOS — this is Linux-only (CachyOS/Arch)
 - Install GUI themes beyond what's in the committed configs
 - Manage personal data (SSH keys, GPG keys, browser profiles)
 
 These are handled outside the repo and documented as manual post-install steps
-in `install.sh`'s printed output.
+in the install scripts' printed output.

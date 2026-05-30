@@ -12,7 +12,7 @@ usage() {
   Update all the things.
 
 $(fmt_key "Commands:")
-    packages        Update system packages (pacman + paru)
+    packages        Update system packages (brew on macOS; pacman + paru on Linux)
     nvim            Update Neovim plugins
     dotfiles        Pull latest dotfiles from git
     zsh             Update zsh plugins
@@ -27,19 +27,30 @@ update_packages() {
   log_file=$(mktemp)
   trap 'rm -f "$log_file"' RETURN
 
-  run_with_spinner "sudo pacman -Syu --noconfirm > '$log_file' 2>&1" 11 "Updating pacman packages"
+  if is_mac; then
+    run_with_spinner "brew update > '$log_file' 2>&1" 11 "Updating Homebrew"
+    log_success "Homebrew updated"
 
-  if grep -q "error\|Error\|failed\|Failed" "$log_file"; then
-    log_error "pacman update had errors:"
-    cat "$log_file"
-    exit 1
-  fi
+    run_with_spinner "brew upgrade > '$log_file' 2>&1" 11 "Upgrading formulae"
+    log_success "Homebrew formulae up to date"
 
-  log_success "pacman up to date"
+    run_with_spinner "brew upgrade --cask > '$log_file' 2>&1" 11 "Upgrading casks"
+    log_success "Homebrew casks up to date"
+  else
+    run_with_spinner "sudo pacman -Syu --noconfirm > '$log_file' 2>&1" 11 "Updating pacman packages"
 
-  if command -v paru &>/dev/null; then
-    run_with_spinner "paru -Sua --noconfirm > '$log_file' 2>&1" 11 "Updating AUR packages"
-    log_success "paru (AUR) up to date"
+    if grep -q "error\|Error\|failed\|Failed" "$log_file"; then
+      log_error "pacman update had errors:"
+      cat "$log_file"
+      exit 1
+    fi
+
+    log_success "pacman up to date"
+
+    if command -v paru &>/dev/null; then
+      run_with_spinner "paru -Sua --noconfirm > '$log_file' 2>&1" 11 "Updating AUR packages"
+      log_success "paru (AUR) up to date"
+    fi
   fi
 }
 

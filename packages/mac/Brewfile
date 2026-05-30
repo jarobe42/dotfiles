@@ -1,0 +1,64 @@
+# Brewfile — macOS packages
+# Run: brew bundle --file packages/mac/Brewfile
+#
+# Mirrors the Linux base.txt and cloud.txt lists where equivalents exist.
+# GUI apps installed via cask; CLI tools via brew.
+
+########################################################
+# Core CLI — matches packages/linux/base.txt
+########################################################
+
+brew "bat"           # cat with syntax highlighting
+brew "btop"          # resource monitor
+brew "cloc"          # count lines of code
+brew "entr"          # run commands on file change
+brew "eza"           # modern ls
+brew "fd"            # fast file finder
+brew "fnm"           # Node version manager
+brew "fzf"           # fuzzy finder
+brew "git"
+brew "git-delta"     # better git diffs
+brew "gh"            # GitHub CLI
+brew "gum"           # shell script UI components
+brew "jq"            # JSON processor
+brew "lazygit"       # git TUI
+brew "neovim"
+brew "ripgrep"       # fast grep
+brew "shellcheck"    # shell script linter
+brew "stylua"        # Lua formatter
+brew "uv"            # Python package/project manager
+brew "wget"
+brew "yq"            # YAML processor
+brew "zoxide"        # smarter cd
+brew "zsh"
+
+########################################################
+# Cloud — matches packages/linux/cloud.txt
+########################################################
+
+brew "awscli"
+brew "helm"
+brew "k9s"           # Kubernetes TUI
+brew "kubectl"
+brew "kubectx"       # kubectl context/namespace switcher
+brew "stern"         # multi-pod log tailing
+
+########################################################
+# GUI apps
+########################################################
+
+cask "1password"
+cask "1password-cli"
+cask "firefox"
+cask "ghostty"       # terminal emulator (same as Linux)
+cask "obsidian"
+cask "spotify"
+cask "visual-studio-code"
+cask "zed"
+
+########################################################
+# Fonts
+########################################################
+
+cask "font-monaspace"
+cask "font-symbols-only-nerd-font"

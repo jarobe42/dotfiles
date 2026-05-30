@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+########################################################
+# Platform detection
+########################################################
+
+is_mac()   { [[ "$(uname -s)" == "Darwin" ]]; }
+is_linux() { [[ "$(uname -s)" == "Linux" ]]; }
+
 setup_colors() {
   # Check if function has already run
   if [[ -n "${SETUP_COLORS_COMPLETE:-}" ]]; then

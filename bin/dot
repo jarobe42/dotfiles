@@ -58,32 +58,46 @@ EOF
   done
 }
 
-cmd_clean() {
-  links=(
-    ".config/niri"
-    ".config/waybar"
-    ".config/mako"
-    ".config/fuzzel"
-    ".config/ghostty"
-    ".config/git"
-    ".config/lazygit"
-    ".config/nvim"
-    ".config/ripgrep"
-    ".config/tmux"
-    ".config/zsh"
-  )
+# Return the platform config dir(s) to link on the current platform.
+# Always includes shared; adds linux/ or mac/ depending on OS.
+platform_config_dirs() {
+  echo "$DOTFILES/config/shared"
+  if is_mac; then
+    echo "$DOTFILES/config/mac"
+  else
+    echo "$DOTFILES/config/linux"
+  fi
+}
 
+# Collect all config dirs that would be linked on the current platform.
+# Used by backup and clean to build their file lists dynamically.
+all_linked_configs() {
+  while IFS= read -r dir; do
+    for config in "$dir"/*/; do
+      [ -d "$config" ] || continue
+      basename "$config"
+    done
+  done < <(platform_config_dirs)
+}
+
+cmd_clean() {
   fmt_title_underline "Cleaning up broken symlinks..."
 
-  for link in "${links[@]}"; do
-    path_link="$HOME/$link"
+  while IFS= read -r name; do
+    path_link="$CONFIG_HOME/$name"
     if [ -L "$path_link" ] && [ ! -e "$path_link" ]; then
       log_success "Removing broken symlink: $path_link"
       rm "$path_link"
     else
       log_info "Link $path_link not found or not broken. Skipping..."
     fi
-  done
+  done < <(all_linked_configs)
+
+  # .zshenv special case
+  if [ -L "$HOME/.zshenv" ] && [ ! -e "$HOME/.zshenv" ]; then
+    log_success "Removing broken symlink: ~/.zshenv"
+    rm "$HOME/.zshenv"
+  fi
 
   echo -e
   log_success "Done."
@@ -123,35 +137,27 @@ cmd_backup() {
 
   log_info "Creating backup in: $backup_path"
 
-  files_to_backup=(
-    ".config/niri"
-    ".config/waybar"
-    ".config/mako"
-    ".config/fuzzel"
-    ".config/ghostty"
-    ".config/git"
-    ".config/lazygit"
-    ".config/nvim"
-    ".config/ripgrep"
-    ".config/tmux"
-    ".config/zsh"
-  )
-
   tmpfile=$(mktemp)
   trap 'rm -f "$tmpfile"' EXIT
 
-  for file in "${files_to_backup[@]}"; do
-    src_path="${HOME}/${file}"
+  while IFS= read -r name; do
+    src_path="$CONFIG_HOME/$name"
     if [[ -L "$src_path" ]]; then
-      [[ "$verbose" == true ]] && log_info "Skipping symlink: $file"
+      [[ "$verbose" == true ]] && log_info "Skipping symlink: .config/$name"
       continue
     elif [[ -e "$src_path" ]]; then
-      echo "$file" >>"$tmpfile"
-      [[ "$verbose" == true ]] && log_info "Found: $file"
+      echo ".config/$name" >>"$tmpfile"
+      [[ "$verbose" == true ]] && log_info "Found: .config/$name"
     else
       [[ "$verbose" == true ]] && log_info "Not found: $src_path"
     fi
-  done
+  done < <(all_linked_configs)
+
+  # .zshenv special case
+  if [[ -e "$HOME/.zshenv" && ! -L "$HOME/.zshenv" ]]; then
+    echo ".zshenv" >>"$tmpfile"
+    [[ "$verbose" == true ]] && log_info "Found: ~/.zshenv"
+  fi
 
   if [[ -s "$tmpfile" ]]; then
     mkdir -p "$backup_dir"
@@ -218,24 +224,34 @@ cmd_link() {
   }
 
   if [ "$pkg" = "all" ]; then
-    # Link all config/ dirs to $XDG_CONFIG_HOME/
-    for config in "$DOTFILES/config"/*; do
-      [ -d "$config" ] || continue
-      local name
-      name=$(basename "$config")
-      do_link "$config" "$CONFIG_HOME/$name"
-    done
+    # Link all config dirs for the current platform
+    while IFS= read -r config_dir; do
+      for config in "$config_dir"/*/; do
+        [ -d "$config" ] || continue
+        local name
+        name=$(basename "$config")
+        do_link "$config" "$CONFIG_HOME/$name"
+      done
+    done < <(platform_config_dirs)
 
-    # .zshenv lives in config/zsh/ but links to $HOME/.zshenv
-    local zshenv_src="$DOTFILES/config/zsh/.zshenv"
+    # .zshenv lives in config/shared/zsh/ but links to $HOME/.zshenv
+    local zshenv_src="$DOTFILES/config/shared/zsh/.zshenv"
     if [ -f "$zshenv_src" ]; then
       do_link "$zshenv_src" "$HOME/.zshenv"
     fi
   else
-    if [ -d "$DOTFILES/config/$pkg" ]; then
-      do_link "$DOTFILES/config/$pkg" "$CONFIG_HOME/$pkg"
-    else
-      log_error "Package '$pkg' not found in $DOTFILES/config/"
+    # Find the package in shared or platform-specific dir
+    local found=false
+    while IFS= read -r config_dir; do
+      if [ -d "$config_dir/$pkg" ]; then
+        do_link "$config_dir/$pkg" "$CONFIG_HOME/$pkg"
+        found=true
+        break
+      fi
+    done < <(platform_config_dirs)
+
+    if [ "$found" = false ]; then
+      log_error "Package '$pkg' not found in config/shared/ or platform config dir"
       return 1
     fi
   fi

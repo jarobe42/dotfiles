@@ -10,8 +10,9 @@ HISTSIZE=10000
 SAVEHIST=10000
 
 # DOTFILES points to the root of this repo.
-# Resolved from the location of this file: config/zsh/.zshenv → (up 3) = dotfiles root
-export DOTFILES="$(dirname "$(dirname "$(dirname "$(readlink -f "${(%):-%N}")")")")"
+# Resolved from the location of this file: config/shared/zsh/.zshenv → (up 4) = dotfiles root.
+# :A resolves symlinks to an absolute path (portable, no readlink -f needed); :h is dirname.
+export DOTFILES="${${(%):-%N}:A:h:h:h:h}"
 
 export CACHEDIR="$HOME/.local/share"
 export VIM_TMP="$HOME/.vim-tmp"
@@ -23,10 +24,19 @@ export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 [[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
 
 fpath=(
-    $DOTFILES/config/zsh/functions
-    /usr/share/zsh/site-functions
+    $DOTFILES/config/shared/zsh/functions
     $fpath
 )
+
+# Platform-specific zsh site-functions
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  for brew_prefix in /opt/homebrew /usr/local; do
+    [[ -d "$brew_prefix/share/zsh/site-functions" ]] && \
+      fpath=("$brew_prefix/share/zsh/site-functions" $fpath) && break
+  done
+else
+  [[ -d /usr/share/zsh/site-functions ]] && fpath=(/usr/share/zsh/site-functions $fpath)
+fi
 
 typeset -aU path
 
@@ -44,3 +54,10 @@ export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
 
 # kubectl plugins installed via krew
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# Homebrew (macOS) — prepend so brew tools take precedence
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  for brew_prefix in /opt/homebrew /usr/local; do
+    [[ -d "$brew_prefix/bin" ]] && export PATH="$brew_prefix/bin:$brew_prefix/sbin:$PATH" && break
+  done
+fi

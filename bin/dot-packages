@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# Description: Install packages from packages/ lists using pacman and paru
+# Description: Install packages from packages/ lists using the platform package manager
 
 set -Eeuo pipefail
 source "$DOTFILES/bin/lib/common.sh"
 command_name=$(basename "${BASH_SOURCE[0]}")
 
-PACKAGES_DIR="$DOTFILES/packages"
+if is_mac; then
+  PACKAGES_DIR="$DOTFILES/packages/mac"
+else
+  PACKAGES_DIR="$DOTFILES/packages/linux"
+fi
 
 usage() {
   cat <<EOF
@@ -15,7 +19,9 @@ Install packages from the dotfiles package lists.
 
 $(fmt_key "Commands:")
     install         Install all packages (default)
-    install <list>  Install a specific list (base, desktop, aur, dev)
+    install <list>  Install a specific list
+                    Linux: base, desktop, cloud, dev, aur
+                    macOS: (installs full Brewfile)
     list            Show all packages that would be installed
     --dry-run       Print commands without running them
 
@@ -28,6 +34,10 @@ parse_list() {
   [[ -f "$file" ]] || return 0
   awk '!/^\s*#/ && !/^\s*$/ {print $1}' "$file"
 }
+
+########################################################
+# Linux: pacman + paru
+########################################################
 
 install_pacman() {
   local list_file="$1"
@@ -55,7 +65,7 @@ install_aur() {
   [[ -f "$list_file" ]] || { log_warning "AUR list not found: $list_file"; return; }
 
   if ! command -v paru &>/dev/null; then
-    log_error "paru not found — run install.sh first to bootstrap paru"
+    log_error "paru not found — run install-linux.sh first to bootstrap paru"
     exit 1
   fi
 
@@ -87,7 +97,40 @@ install_aur() {
   fi
 }
 
+########################################################
+# macOS: Homebrew
+########################################################
+
+install_brew() {
+  local brewfile="$PACKAGES_DIR/Brewfile"
+  [[ -f "$brewfile" ]] || { log_error "Brewfile not found: $brewfile"; exit 1; }
+
+  if ! command -v brew &>/dev/null; then
+    log_error "Homebrew not found — run install-mac.sh first to install Homebrew"
+    exit 1
+  fi
+
+  fmt_title_underline "Installing packages (brew bundle)"
+
+  if [[ "${DRY_RUN:-}" == true ]]; then
+    log_info "[dry-run] brew bundle --file $brewfile"
+  else
+    brew bundle --file "$brewfile"
+  fi
+  log_success "Packages done"
+}
+
+########################################################
+# List / install commands
+########################################################
+
 cmd_list() {
+  if is_mac; then
+    fmt_title_underline "mac (Brewfile)"
+    cat "$PACKAGES_DIR/Brewfile"
+    return
+  fi
+
   for list in base desktop dev; do
     local file="$PACKAGES_DIR/$list.txt"
     [[ -f "$file" ]] || continue
@@ -101,6 +144,11 @@ cmd_list() {
 
 cmd_install() {
   local target="${1:-all}"
+
+  if is_mac; then
+    install_brew
+    return
+  fi
 
   case "$target" in
   all)
