@@ -12,8 +12,9 @@ usage() {
   First-run setup for the GNOME desktop environment.
 
 $(fmt_key "Commands:")
-    setup       Run all first-run setup steps
-    dirs        Create XDG user directories (Documents, Downloads, etc.)
+    setup         Run all first-run setup steps
+    keybindings   Set GNOME custom keybindings (run inside a GNOME session)
+    dirs          Create XDG user directories (Documents, Downloads, etc.)
 EOF
 }
 
@@ -26,6 +27,33 @@ cmd_dirs() {
   else
     log_warning "xdg-user-dirs not found — install it first"
   fi
+}
+
+# Set GNOME custom keybindings. Must be called inside a running GNOME session.
+# Invoked automatically on first login via the autostart entry written by cmd_setup.
+cmd_keybindings() {
+  fmt_title_underline "GNOME keybindings"
+
+  local kb_path='/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/'
+
+  # Skip if already set
+  if gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb_path}" \
+       binding 2>/dev/null | grep -q '<Super>d'; then
+    log_info "Fuzzel keybinding already set"
+  else
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \
+      "['${kb_path}']"
+    gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb_path}" \
+      name 'Launcher'
+    gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb_path}" \
+      command 'fuzzel'
+    gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb_path}" \
+      binding '<Super>d'
+    log_success "Fuzzel launcher bound to Meta+D"
+  fi
+
+  # Self-remove: this autostart entry is one-shot
+  rm -f "$HOME/.config/autostart/dot-gnome-keybindings.desktop"
 }
 
 cmd_setup() {
@@ -49,13 +77,26 @@ cmd_setup() {
     log_warning "gnome-shell not found — was the gnome package installed?"
   fi
 
+  # Drop a one-shot autostart to apply GNOME keybindings on first login.
+  # gsettings requires a running GNOME session, so we can't call it here.
+  mkdir -p "$HOME/.config/autostart"
+  cat > "$HOME/.config/autostart/dot-gnome-keybindings.desktop" <<DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Dotfiles GNOME keybindings (one-shot)
+Exec=bash -c 'DOTFILES=${DOTFILES} PATH=${DOTFILES}/bin:\$PATH dot-gnome keybindings'
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=3
+NoDisplay=true
+Comment=Set GNOME custom keybindings on first login, then removes itself
+DESKTOP
+  log_success "Keybinding setup queued for first login (Meta+D → fuzzel)"
+
   echo -e
   log_success "GNOME setup done"
   log_info ""
-  log_info "Manual steps:"
-  log_info "  1. Log out and select 'GNOME' from the display manager (GDM)"
-  log_info "  2. Bind Meta+D to fuzzel: Settings > Keyboard > Custom Shortcuts"
-  log_info "     Name: Launcher, Command: fuzzel, Shortcut: Super+D"
+  log_info "Manual step:"
+  log_info "  Log out and select 'GNOME' from the display manager (GDM)"
 }
 
 main() {
@@ -63,8 +104,9 @@ main() {
   shift || true
 
   case "$subcmd" in
-  setup) cmd_setup ;;
-  dirs)  cmd_dirs ;;
+  setup)       cmd_setup ;;
+  keybindings) cmd_keybindings ;;
+  dirs)        cmd_dirs ;;
   -h | --help) usage ;;
   *) log_error "Unknown command: $subcmd"; usage; exit 1 ;;
   esac
