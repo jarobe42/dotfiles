@@ -12,21 +12,30 @@
 [window]
 startup_mode = "Maximized"
 decorations = "None"
+opacity = 0.95
 
 [window.padding]
-x = 10
-y = 8
+x = 12
+y = 10
 
 [font]
 size = 14.0
 
 [font.normal]
-family = "Monaspace Argon"
+family = "MonaspaceArgon Nerd Font Mono"
 style = "Regular"
 
 [font.bold]
-family = "Monaspace Argon"
+family = "MonaspaceArgon Nerd Font Mono"
 style = "Bold"
+
+[font.italic]
+family = "MonaspaceArgon Nerd Font Mono"
+style = "Italic"
+
+[font.bold_italic]
+family = "MonaspaceArgon Nerd Font Mono"
+style = "Bold Italic"
 
 [cursor]
 style = { shape = "Block", blinking = "Never" }

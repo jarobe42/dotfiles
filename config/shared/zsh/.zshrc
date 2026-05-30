@@ -97,7 +97,7 @@ zstyle ':completion:*' group-name ''
 # Skipped if already inside tmux, or if tmux isn't installed yet.
 ########################################################
 
-if command -v tmux &>/dev/null && [[ -z "$TMUX" ]]; then
+if command -v tmux &>/dev/null && [[ -z "$TMUX" ]] && [[ "$TERM_PROGRAM" != "ghostty" ]]; then
   exec tmux new-session -A -s main
 fi
 

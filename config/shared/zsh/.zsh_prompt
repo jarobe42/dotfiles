@@ -167,6 +167,7 @@ git_status() {
 }
 
 async_init
+async_stop_worker vcs_info 2>/dev/null
 async_start_worker vcs_info
 async_register_callback vcs_info git_status_done
 
