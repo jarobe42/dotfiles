@@ -46,7 +46,7 @@ dotfiles/
 │   ├── dot-update       # update everything
 │   └── lib/common.sh    # shared logging/colour helpers
 ├── config/              # symlinked into ~/.config/
-│   ├── albert/          # app launcher (Meta+D)
+│   ├── fuzzel/          # app launcher (Meta+D — bind via GNOME custom shortcuts)
 │   ├── ghostty/         # terminal emulator
 │   ├── git/             # git config + global ignore
 │   ├── lazygit/         # lazygit config

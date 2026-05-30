@@ -87,7 +87,7 @@ dotfiles/
 │   │   ├── aws/            # AWS CLI config (credential_process, no stored secrets)
 │   │   └── …
 │   ├── linux/              # Linux-only configs
-│   │   └── albert/         # app launcher (Meta+D)
+│   │   └── fuzzel/         # app launcher (Meta+D — bind via GNOME custom shortcuts)
 │   └── mac/                # macOS-only configs (empty — add as needed)
 └── packages/
     ├── linux/

@@ -7,6 +7,9 @@ gnome-tweaks             # settings beyond the standard Settings app
 xdg-desktop-portal-gnome # desktop portal (file picker, screen capture)
 xdg-user-dirs            # standard home dirs (Documents, Downloads, etc.)
 
+# App launcher
+fuzzel                   # Wayland-native app launcher (Meta+D); in official repos, no AUR
+
 # Screenshot (supplements GNOME's built-in screenshot tool)
 grim                     # screenshot tool (Wayland)
 slurp                    # region selection for grim
@@ -27,7 +30,8 @@ qt5-wayland
 qt6-wayland
 
 # Terminal
-ghostty                  # using ghostty — already familiar from Mac
+alacritty                # primary terminal emulator (same as Mac)
+ghostty                  # alternative terminal (native tabs, better font rendering)
 
 # Editors / IDEs (VSCode is in aur.txt — proprietary build)
 zed                      # fast, modern editor with native Claude assistant

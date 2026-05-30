@@ -186,8 +186,8 @@ Manual steps still required:
   3. Install neovim plugins on first launch:
      nvim  (lazy.nvim will run automatically)
 
-  4. Albert launches automatically (Meta+D) — enable desired plugins
-     via the Albert settings on first run
+  4. Bind fuzzel to Meta+D: Settings > Keyboard > Custom Shortcuts
+     Name: Launcher, Command: fuzzel, Shortcut: Super+D
 
   5. Keychron K15 Pro: set the hardware switch to Mac mode on both Mac and Linux.
      keyd intercepts Super (physical Cmd key) and remaps it to Ctrl for app shortcuts.

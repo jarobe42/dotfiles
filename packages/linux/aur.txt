@@ -1,9 +1,6 @@
 # AUR packages — installed via paru
 # These are not in the official Arch/CachyOS repos
 
-# App launcher
-albert-bin               # extensible application launcher (Raycast-style) — prebuilt binary, no Qt6 compilation
-
 # Editors / IDEs
 visual-studio-code-bin   # VS Code (proprietary build; use codium for FOSS)
 
