@@ -142,13 +142,13 @@ run dot-services enable
 success "Services enabled"
 
 ########################################################
-# Phase 8: Niri first-run setup
+# Phase 8: GNOME first-run setup
 ########################################################
 
-header "Niri"
+header "GNOME"
 
-run dot-niri setup
-success "Niri ready"
+run dot-gnome setup
+success "GNOME ready"
 
 ########################################################
 # Phase 9: Krew (kubectl plugin manager)
@@ -172,18 +172,20 @@ Manual steps still required:
 
   1. Log out and back in (shell change takes effect, Docker group applies)
 
-  2. Select "Niri" from the display manager on next login
-     - Or: exec niri  (from a TTY)
+  2. Select "GNOME" from the GDM login screen on next login
 
-  3. Set monitor outputs in ~/.config/niri/config.kdl
-     Run inside a niri session:  niri msg outputs
-
-  4. Install neovim plugins on first launch:
+  3. Install neovim plugins on first launch:
      nvim  (lazy.nvim will run automatically)
 
-  5. Set a wallpaper (optional):
-     Edit the swaybg line in ~/.config/niri/config.kdl
+  4. Configure keyboard layout:
+     Settings > Keyboard > Input Sources
 
-  6. Customise waybar, mako, and fuzzel in ~/.config/
+  5. Albert launches automatically (Meta+D) — enable desired plugins
+     via the Albert settings on first run
+
+  6. Authenticate 1Password and sign in to sync credentials
+
+  7. Set ANTHROPIC_API_KEY in ~/.zshenv.local for Zed's Claude assistant:
+     export ANTHROPIC_API_KEY="$(op read 'op://Personal/Anthropic API/credential')"
 
 EOF

@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Description: First-run setup for GNOME desktop
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+command_name=$(basename "${BASH_SOURCE[0]}")
+
+usage() {
+  cat <<EOF
+  $(fmt_key "Usage:") $(fmt_cmd "$command_name") $(fmt_value "[options] <command>")
+
+  First-run setup for the GNOME desktop environment.
+
+$(fmt_key "Commands:")
+    setup       Run all first-run setup steps
+    dirs        Create XDG user directories (Documents, Downloads, etc.)
+EOF
+}
+
+cmd_dirs() {
+  fmt_title_underline "Creating XDG user directories"
+
+  if command -v xdg-user-dirs-update &>/dev/null; then
+    xdg-user-dirs-update
+    log_success "XDG user dirs created"
+  else
+    log_warning "xdg-user-dirs not found — install it first"
+  fi
+}
+
+cmd_setup() {
+  fmt_title_underline "GNOME first-run setup"
+
+  cmd_dirs
+
+  # Enable GDM (display manager)
+  if systemctl is-enabled gdm &>/dev/null; then
+    log_info "GDM already enabled"
+  else
+    log_info "Enabling GDM..."
+    sudo systemctl enable gdm
+    log_success "GDM enabled"
+  fi
+
+  # Verify gnome-shell is present
+  if command -v gnome-shell &>/dev/null; then
+    log_success "gnome-shell found: $(gnome-shell --version)"
+  else
+    log_warning "gnome-shell not found — was the gnome package installed?"
+  fi
+
+  echo -e
+  log_success "GNOME setup done"
+  log_info ""
+  log_info "Manual steps:"
+  log_info "  1. Log out and select 'GNOME' from the display manager (GDM)"
+  log_info "  2. Open Settings > Keyboard to configure input sources / layouts"
+  log_info "  3. Albert launches on login (autostart=true) — trigger with Meta+D"
+}
+
+main() {
+  local subcmd="${1:-setup}"
+  shift || true
+
+  case "$subcmd" in
+  setup) cmd_setup ;;
+  dirs)  cmd_dirs ;;
+  -h | --help) usage ;;
+  *) log_error "Unknown command: $subcmd"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"

@@ -1,0 +1,114 @@
+// Zed settings — ~/.config/zed/settings.json
+// Reference: https://zed.dev/docs/configuration
+{
+  // ── Appearance ──────────────────────────────────────────────────────────────
+
+  "theme": {
+    "mode": "dark",
+    "dark": "Tokyo Night",
+    "light": "Tokyo Night Light"
+  },
+
+  "ui_font_size": 14,
+
+  "buffer_font_family": "Monaspace Neon",
+  "buffer_font_size": 13,
+  "buffer_font_features": {
+    "calt": true // ligatures
+  },
+
+  // ── Editor behaviour ─────────────────────────────────────────────────────────
+
+  "vim_mode": true,
+  "base_keymap": "VSCode",
+
+  "format_on_save": "on",
+  "autosave": "on_focus_change",
+
+  "tab_size": 2,
+  "hard_tabs": false,
+  "ensure_final_newline_on_save": true,
+  "remove_trailing_whitespace_on_save": true,
+
+  "show_whitespaces": "selection",
+  "show_wrap_guides": true,
+  "wrap_guides": [100],
+
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true
+  },
+
+  // ── Git ──────────────────────────────────────────────────────────────────────
+
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+      "delay_ms": 600
+    }
+  },
+
+  // ── UI panels ────────────────────────────────────────────────────────────────
+
+  "project_panel": {
+    "dock": "left",
+    "default_width": 240,
+    "file_icons": true,
+    "git_status": true,
+    "indent_size": 16
+  },
+
+  "outline_panel": {
+    "dock": "right"
+  },
+
+  "collaboration_panel": {
+    "button": false
+  },
+
+  "notification_panel": {
+    "button": false
+  },
+
+  // ── Terminal ─────────────────────────────────────────────────────────────────
+
+  "terminal": {
+    "font_family": "Monaspace Neon",
+    "font_size": 13,
+    "shell": {
+      "program": "zsh"
+    },
+    "env": {},
+    "dock": "bottom",
+    "default_height": 280
+  },
+
+  // ── AI Assistant ─────────────────────────────────────────────────────────────
+  //
+  // Uses the Anthropic API directly.
+  // Set ANTHROPIC_API_KEY in ~/.zshenv.local — Zed picks it up from the env.
+  //
+  // Example .zshenv.local entry (using 1Password):
+  //   export ANTHROPIC_API_KEY="$(op read 'op://Personal/Anthropic API/credential')"
+  //
+  // Or for a static key:
+  //   export ANTHROPIC_API_KEY="sk-ant-..."
+
+  "assistant": {
+    "version": "2",
+    "button": true,
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6"
+    }
+  },
+
+  // ── Telemetry ────────────────────────────────────────────────────────────────
+
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  }
+}

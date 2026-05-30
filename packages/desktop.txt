@@ -1,32 +1,19 @@
-# Desktop / Wayland stack
+# Desktop — GNOME + GUI apps
 # Requires multilib repo enabled for steam
 
-# Compositor + window management
-niri                     # Wayland compositor (scrollable tiling)
+# Desktop environment
+gnome                    # full GNOME desktop (gnome-shell, GDM, Nautilus, etc.)
+gnome-tweaks             # settings beyond the standard Settings app
 xdg-desktop-portal-gnome # desktop portal (file picker, screen capture)
 xdg-user-dirs            # standard home dirs (Documents, Downloads, etc.)
 
-# Status bar + notifications
-waybar                   # status bar
-mako                     # notification daemon
-
-# App launcher
-fuzzel                   # Wayland-native app launcher
-
-# Screenshot
-grim                     # screenshot tool
+# Screenshot (supplements GNOME's built-in screenshot tool)
+grim                     # screenshot tool (Wayland)
 slurp                    # region selection for grim
 
 # Clipboard
 wl-clipboard             # wl-copy / wl-paste
 cliphist                 # clipboard history manager
-
-# Screen lock + wallpaper
-swaylock                 # screen lock
-swaybg                   # wallpaper setter
-
-# Auth
-polkit-gnome             # authentication agent (sudo GUI prompts)
 
 # Audio (likely pre-installed on CachyOS, ensure present)
 pipewire
@@ -40,9 +27,10 @@ qt5-wayland
 qt6-wayland
 
 # Terminal
-# ghostty                # PENDING DECISION: ghostty vs foot (see packages.md)
-# foot                   # Wayland-native, very lightweight
 ghostty                  # using ghostty — already familiar from Mac
+
+# Editors / IDEs (VSCode is in aur.txt — proprietary build)
+zed                      # fast, modern editor with native Claude assistant
 
 # Browser + general GUI
 firefox
@@ -63,8 +51,8 @@ blueman                  # Bluetooth manager GUI
 networkmanager           # network manager (likely pre-installed)
 network-manager-applet   # tray icon for NetworkManager
 
-# File manager
-thunar                   # GUI file manager (lightweight)
+# File manager (GNOME includes Nautilus; Thunar as lightweight alternative)
+thunar
 
 # Games
 steam                    # requires multilib repo

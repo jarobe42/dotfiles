@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal dotfiles for CachyOS + Niri. Managed with a custom `dot` CLI — no
+Personal dotfiles for CachyOS + GNOME. Managed with a custom `dot` CLI — no
 external tool dependency, just shell scripts.
 
 ## Quickstart
@@ -26,7 +26,7 @@ That's it. The script is safe to re-run.
 5. Sets default shell to zsh
 6. Prompts for git identity (written to `~/.gitconfig-local`)
 7. Enables systemd user services (pipewire, wireplumber)
-8. Validates the niri config
+8. Enables GDM and verifies GNOME is installed
 
 Prints a list of remaining manual steps at the end.
 
@@ -39,22 +39,20 @@ dotfiles/
 ├── bin/
 │   ├── dot              # main CLI
 │   ├── dot-git          # git identity setup
-│   ├── dot-niri         # niri first-run setup
+│   ├── dot-gnome        # GNOME first-run setup
 │   ├── dot-packages     # install packages
 │   ├── dot-services     # enable systemd user services
 │   ├── dot-shell        # set default shell
 │   ├── dot-update       # update everything
 │   └── lib/common.sh    # shared logging/colour helpers
 ├── config/              # symlinked into ~/.config/
-│   ├── fuzzel/          # app launcher
+│   ├── albert/          # app launcher (Meta+D)
 │   ├── ghostty/         # terminal emulator
 │   ├── git/             # git config + global ignore
 │   ├── lazygit/         # lazygit config
-│   ├── mako/            # notification daemon
-│   ├── niri/            # Wayland compositor + keybinds
 │   ├── nvim/            # neovim (nisi setup via lazy.nvim)
 │   ├── ripgrep/         # ripgrep defaults
-│   ├── waybar/          # status bar
+│   ├── zed/             # Zed editor (theme, vim mode, Claude assistant)
 │   └── zsh/             # shell config
 ├── packages/
 │   ├── base.txt         # core CLI tools
@@ -99,7 +97,7 @@ dot git setup
 dot shell change
 dot shell terminfo
 dot services [enable | status]
-dot niri [setup | validate | dirs]
+dot gnome [setup | dirs]
 dot update [packages | nvim | dotfiles | zsh | all]
 ```
 
@@ -111,12 +109,6 @@ dot update [packages | nvim | dotfiles | zsh | all]
 
 Changes to files in `config/` take effect immediately — the files are
 symlinked, so edits in either location are the same file.
-
-Reload the niri config without restarting:
-```bash
-niri msg action reload-config
-# or Super+Shift+R from inside a niri session
-```
 
 Reload zsh:
 ```bash
@@ -130,11 +122,11 @@ reload!
 3. Commit.
 
 ```bash
-mkdir -p config/swayidle
-# ... add config/swayidle/config
-dot link swayidle
-git add config/swayidle
-git commit -m "add swayidle config"
+mkdir -p config/zed
+# ... add config/zed/settings.json
+dot link zed
+git add config/zed
+git commit -m "add zed config"
 ```
 
 ### Updating everything

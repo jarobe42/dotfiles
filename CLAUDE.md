@@ -3,7 +3,7 @@
 ## Purpose
 
 This repo is the single source of truth for setting up a personal Linux
-environment (CachyOS + Niri) from scratch. A fresh machine should be fully
+environment (CachyOS + GNOME) from scratch. A fresh machine should be fully
 productive after running one command:
 
 ```bash
@@ -76,8 +76,7 @@ dotfiles/
 │   ├── aws-op-credentials  # 1Password-backed AWS credential_process helper
 │   └── lib/common.sh       # shared logging, colours, spinner
 ├── config/                 # all configs symlinked into ~/.config/ via dot link
-│   ├── niri/               # Wayland compositor
-│   ├── waybar/             # status bar
+│   ├── albert/             # app launcher (Meta+D)
 │   ├── zsh/                # shell (.zshenv, .zshrc, .zsh_aliases, .zsh_cloud…)
 │   ├── nvim/               # neovim (nisi.setup via lazy.nvim)
 │   ├── git/                # git config (no personal identity — set via dot git setup)
