@@ -62,4 +62,5 @@ cask "zed"
 # Fonts
 ########################################################
 
-cask "font-monaspace-nerd-font"   # NF-patched Monaspace (proper terminal monospacing + icons)
+cask "font-monaspace"             # Monaspace font family
+cask "font-symbols-only-nerd-font" # Nerd Font symbols (icons for prompt/nvim)

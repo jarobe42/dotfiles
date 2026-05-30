@@ -22,19 +22,19 @@ y = 10
 size = 14.0
 
 [font.normal]
-family = "MonaspiceArgon Nerd Font Mono"
+family = "Monaspace Argon"
 style = "Regular"
 
 [font.bold]
-family = "MonaspiceArgon Nerd Font Mono"
+family = "Monaspace Argon"
 style = "Bold"
 
 [font.italic]
-family = "MonaspiceArgon Nerd Font Mono"
+family = "Monaspace Argon"
 style = "Italic"
 
 [font.bold_italic]
-family = "MonaspiceArgon Nerd Font Mono"
+family = "Monaspace Argon"
 style = "Bold Italic"
 
 [cursor]

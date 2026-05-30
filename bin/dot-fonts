@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Description: Install fonts (Linux: Nerd Fonts from GitHub; macOS: via Homebrew)
+
+set -Eeuo pipefail
+source "$DOTFILES/bin/lib/common.sh"
+
+FONT_DIR="$HOME/.local/share/fonts/NerdFonts"
+
+# Nerd Fonts GitHub release URL for Monaspace
+NF_MONASPACE_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Monaspace.zip"
+
+usage() {
+  cat <<EOF
+Usage: dot-fonts <command>
+
+Commands:
+    install     Install fonts (idempotent)
+    status      Check which fonts are installed
+EOF
+}
+
+font_installed() {
+  fc-list | grep -qi "MonaspiceArgon" 2>/dev/null
+}
+
+cmd_install() {
+  if is_mac; then
+    log_info "macOS: fonts managed via Homebrew (font-monaspace-nerd-font cask)"
+    log_info "Run: brew install --cask font-monaspace-nerd-font"
+    return
+  fi
+
+  fmt_title_underline "Fonts"
+
+  if font_installed; then
+    log_info "MonaspiceArgon Nerd Font already installed — skipping"
+    return
+  fi
+
+  if [[ "${DRY_RUN:-false}" == true ]]; then
+    log_info "[dry-run] Would download Monaspace Nerd Font from GitHub and install to $FONT_DIR"
+    return
+  fi
+
+  log_info "Downloading Monaspace Nerd Font..."
+
+  local tmp
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+
+  curl -fsSL --progress-bar "$NF_MONASPACE_URL" -o "$tmp/Monaspace.zip"
+  unzip -q "$tmp/Monaspace.zip" -d "$tmp/monaspace"
+
+  mkdir -p "$FONT_DIR"
+
+  # Install only the Mono OTF variants (correct cell width for terminals)
+  find "$tmp/monaspace" -name "*Mono*.otf" -exec cp {} "$FONT_DIR/" \;
+
+  fc-cache -f "$FONT_DIR"
+
+  log_success "Monaspace Nerd Font installed"
+}
+
+cmd_status() {
+  fmt_title_underline "Font status"
+  if font_installed; then
+    log_success "MonaspiceArgon Nerd Font: installed"
+    fc-list | grep -i "monaspice" | sort
+  else
+    log_warning "MonaspiceArgon Nerd Font: NOT installed"
+  fi
+}
+
+main() {
+  [[ $# -lt 1 ]] && { usage; exit 0; }
+  case "$1" in
+    install) cmd_install ;;
+    status)  cmd_status ;;
+    -h|--help) usage ;;
+    *) log_error "Unknown command: $1"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"
