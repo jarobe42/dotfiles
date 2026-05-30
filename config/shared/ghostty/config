@@ -48,10 +48,26 @@ cursor-style-blink = false
 scrollback-limit = 10000
 
 ########################################################
-# Keybinds
-# Ghostty uses Super/Ctrl/Alt + key notation.
-# Add custom keybinds below.
+# Bell
 ########################################################
 
-# keybind = super+t=new_tab
-# keybind = super+w=close_surface
+audible-bell = false
+
+########################################################
+# Window
+########################################################
+
+window-maximize = true
+# Show tab bar even when window-decoration = false (Linux/GTK only)
+gtk-tabs-location = top
+
+########################################################
+# Keybinds
+# Ghostty uses Super/Ctrl/Alt + key notation.
+# super = Cmd on macOS, Meta/Win on Linux (physical Cmd key via keyd)
+########################################################
+
+keybind = super+t=new_tab
+keybind = super+w=close_surface
+keybind = super+shift+]=next_tab
+keybind = super+shift+[=previous_tab

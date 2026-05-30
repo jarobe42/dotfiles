@@ -36,6 +36,9 @@ uv                       # Python version management + venv + tool installs
 # Node
 fnm                      # Node version manager
 
+# Multiplexer
+tmux
+
 # System
 btop                     # process monitor
 wget

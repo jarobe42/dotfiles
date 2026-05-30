@@ -29,6 +29,7 @@ brew "stylua"        # Lua formatter
 brew "uv"            # Python package/project manager
 brew "wget"
 brew "yq"            # YAML processor
+brew "tmux"
 brew "zoxide"        # smarter cd
 brew "zsh"
 
@@ -50,7 +51,8 @@ brew "stern"         # multi-pod log tailing
 cask "1password"
 cask "1password-cli"
 cask "firefox"
-cask "ghostty"       # terminal emulator (same as Linux)
+cask "alacritty"     # primary terminal emulator (same as Linux)
+cask "ghostty"       # alternative terminal (native tabs, better font rendering)
 cask "obsidian"
 cask "spotify"
 cask "visual-studio-code"

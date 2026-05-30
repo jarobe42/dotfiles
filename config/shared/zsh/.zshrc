@@ -90,6 +90,18 @@ zstyle ':completion:*' group-name ''
 
 
 ########################################################
+# tmux auto-attach
+# Attach to (or create) a session called "main" on every new terminal.
+# -A: attach if the session exists, create it if not.
+# exec: replaces the outer shell so there's no dangling process.
+# Skipped if already inside tmux, or if tmux isn't installed yet.
+########################################################
+
+if command -v tmux &>/dev/null && [[ -z "$TMUX" ]]; then
+  exec tmux new-session -A -s main
+fi
+
+########################################################
 # Plugin setup
 # Uses zfetch (defined in .zsh_functions) — a minimal git-based plugin manager.
 # Plugins are cloned to $ZPLUGDIR on first use and sourced automatically.

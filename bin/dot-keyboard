@@ -50,8 +50,9 @@ cmd_setup() {
     fi
   fi
 
-  # --- xkb layout (GNOME) ---
+  # --- GNOME settings ---
   if command -v gsettings &>/dev/null; then
+    # xkb layout: UK Mac variant (Shift+2=@, matching macOS British layout)
     local current
     current=$(gsettings get org.gnome.desktop.input-sources sources 2>/dev/null || echo "")
     if [[ "$current" == "$XKB_SOURCE" ]]; then
@@ -61,9 +62,20 @@ cmd_setup() {
       log_success "xkb layout set to UK Mac variant (Shift+2=@)"
       log_info "  Log out and back in for the layout change to take full effect"
     fi
+
+    # WM close-window: add Super+Q alongside Alt+F4 (mac Cmd+Q muscle memory)
+    gsettings set org.gnome.desktop.wm.keybindings close "['<Super>q', '<Alt>F4']"
+    log_success "GNOME: Super+Q bound to close window"
+
+    # Disable audible bell
+    gsettings set org.gnome.desktop.wm.preferences audible-bell false
+    log_success "GNOME: audible bell disabled"
+
   else
-    log_warning "gsettings not available — set keyboard layout manually:"
+    log_warning "gsettings not available — set keyboard settings manually:"
     log_info "  Settings > Keyboard > Input Sources → English (UK, Macintosh)"
+    log_info "  Settings > Keyboard > Keyboard Shortcuts → Close Window → Super+Q"
+    log_info "  (Custom shortcuts Super+Return/Super+D are set on first GNOME login)"
   fi
 
   echo -e
