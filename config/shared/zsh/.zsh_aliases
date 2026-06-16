@@ -60,3 +60,12 @@ fi
 ########################################################
 
 alias lg="lazygit"
+
+########################################################
+# tmux session management
+########################################################
+
+alias tl="tmux list-sessions 2>/dev/null || echo 'No tmux server running'"
+alias ta="tmux new-session -A -s"   # ta <name> — attach or create
+alias tk="tmux kill-session -t"     # tk <name> — kill named session
+alias td="tmux detach"
