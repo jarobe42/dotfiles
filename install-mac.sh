@@ -136,6 +136,26 @@ run dot-cloud krew
 success "Krew ready"
 
 ########################################################
+# Phase 7: Node (fnm) + Claude Code CLI
+########################################################
+
+header "Node + Claude Code"
+
+if ! command -v fnm &>/dev/null; then
+  warn "fnm not found — skipping (brew install fnm and re-run)"
+else
+  eval "$(fnm env --shell bash)"
+  run fnm install --lts
+  run fnm default lts-latest
+  if command -v claude &>/dev/null; then
+    info "Claude Code already installed"
+  else
+    run npm install -g @anthropic-ai/claude-code
+    success "Claude Code installed"
+  fi
+fi
+
+########################################################
 # Done — print manual steps
 ########################################################
 
@@ -156,7 +176,7 @@ Manual steps still required:
 
   4. Authenticate 1Password and sign in to sync credentials
 
-  5. Set ANTHROPIC_API_KEY in ~/.zshenv.local for Zed's Claude assistant:
+  5. Set ANTHROPIC_API_KEY in ~/.zshenv.local (for Zed assistant + Claude Code CLI):
      export ANTHROPIC_API_KEY="$(op read 'op://Personal/Anthropic API/credential')"
 
 EOF

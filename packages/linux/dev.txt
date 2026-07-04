@@ -2,6 +2,8 @@
 # Populate as needed. Empty to start — add packages here as you install them
 # during normal work, then they're captured for the next bootstrap.
 
+fnm                      # Node version manager (install.sh uses it for Claude Code)
+
 # Example entries (uncomment or add as needed):
 # lua-language-server    # LSP for Lua (neovim config)
 # pyright                # Python LSP (or install via uv: uv tool install pyright)
